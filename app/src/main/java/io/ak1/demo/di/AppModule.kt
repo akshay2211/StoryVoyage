@@ -8,7 +8,6 @@ import io.ak1.demo.data.source.AiAssistantDataSource
 import io.ak1.demo.data.source.AiAssistantDataSourceImpl
 import io.ak1.demo.data.source.VoiceRecognitionDataSource
 import io.ak1.demo.data.source.VoiceRecognitionDataSourceImpl
-import io.ak1.demo.data.voice.VoiceToTextParser
 import io.ak1.demo.domain.repository.AiAssistantRepository
 import io.ak1.demo.domain.repository.ThemeRepository
 import io.ak1.demo.domain.repository.VoiceRecognitionRepository
@@ -35,7 +34,6 @@ import org.koin.dsl.module
 val appModule = module {
     // Data Sources
     single { ThemePreferencesDataSource(get()) }
-    single { VoiceToTextParser(get()) }
     single<VoiceRecognitionDataSource> { VoiceRecognitionDataSourceImpl(get()) }
     single<AiAssistantDataSource> { AiAssistantDataSourceImpl(get()) }
 

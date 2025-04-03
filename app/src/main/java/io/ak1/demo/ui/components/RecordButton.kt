@@ -29,7 +29,6 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TooltipState
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +44,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import io.ak1.demo.R
-import kotlin.math.abs
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,10 +59,13 @@ fun RecordButton(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var canRecord by remember { mutableStateOf(ContextCompat.checkSelfPermission(
-        context,
-        android.Manifest.permission.RECORD_AUDIO
-    ) == android.content.pm.PackageManager.PERMISSION_GRANTED) }
+    var canRecord by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.RECORD_AUDIO
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        )
+    }
 
     val recordAudioLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -73,46 +75,38 @@ fun RecordButton(
     val scale = transition.animateFloat(
         transitionSpec = { spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow) },
         label = "record-scale",
-        targetValueByState = { rec -> if (rec) 2f else 1f }
-    )
+        targetValueByState = { rec -> if (rec) 2f else 1f })
     val containerAlpha = transition.animateFloat(
         transitionSpec = { tween(2000) },
         label = "record-scale",
-        targetValueByState = { rec -> if (rec) 1f else 0f }
-    )
+        targetValueByState = { rec -> if (rec) 1f else 0f })
     val iconColor = transition.animateColor(
         transitionSpec = { tween(200) },
         label = "record-scale",
         targetValueByState = { rec ->
             if (rec) contentColorFor(LocalContentColor.current)
             else LocalContentColor.current
-        }
-    )
+        })
 
     Box {
         // Background during recording
-        Box(
-            Modifier
-                .matchParentSize()
-                .aspectRatio(1f)
-                .graphicsLayer {
-                    alpha = containerAlpha.value
-                    scaleX = scale.value; scaleY = scale.value
-                }
-                .clip(CircleShape)
-                .background(LocalContentColor.current)
-        )
+        Box(Modifier
+            .matchParentSize()
+            .aspectRatio(1f)
+            .graphicsLayer {
+                alpha = containerAlpha.value
+                scaleX = scale.value; scaleY = scale.value
+            }
+            .clip(CircleShape)
+            .background(LocalContentColor.current))
         val scope = rememberCoroutineScope()
         val tooltipState = remember { TooltipState() }
         TooltipBox(
-            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-            tooltip = {
+            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(), tooltip = {
                 RichTooltip {
                     Text(stringResource(R.string.touch_and_hold_to_record))
                 }
-            },
-            enableUserInput = false,
-            state = tooltipState
+            }, enableUserInput = false, state = tooltipState
         ) {
             Icon(
                 Icons.Default.Mic,
@@ -127,9 +121,11 @@ fun RecordButton(
                         onSwipeProgressChanged = onSwipeOffsetChange,
                         onClick = {
                             if (canRecord) {
-                            scope.launch { tooltipState.show() }}else{
+                                scope.launch { tooltipState.show() }
+                            } else {
                                 recordAudioLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
-                            } },
+                            }
+                        },
                         onStartRecording = onStartRecording,
                         onFinishRecording = onFinishRecording,
                         onCancelRecording = onCancelRecording,
@@ -156,38 +152,29 @@ private fun Modifier.voiceRecordingGesture(
         val swipeToCancelThresholdPx = swipeToCancelThreshold.toPx()
         val verticalThresholdPx = verticalThreshold.toPx()
 
-        detectDragGesturesAfterLongPress(
-            onDragStart = {
-                onSwipeProgressChanged(0f)
-                offsetY = 0f
-                dragging = true
-                onStartRecording()
-            },
-            onDragCancel = {
-                onCancelRecording()
-                dragging = false
-            },
-            onDragEnd = {
-                if (dragging) {
-                    onFinishRecording()
-                }
-                dragging = false
-            },
-            onDrag = { change, dragAmount ->
-                if (dragging) {
-                    onSwipeProgressChanged(horizontalSwipeProgress() + dragAmount.x)
-                    offsetY += dragAmount.y
-                    val offsetX = horizontalSwipeProgress()
-                    if (
-                        offsetX < 0 &&
-                        abs(offsetX) >= swipeToCancelThresholdPx &&
-                        abs(offsetY) <= verticalThresholdPx
-                    ) {
-                        onCancelRecording()
-                        dragging = false
-                    }
+        detectDragGesturesAfterLongPress(onDragStart = {
+            onSwipeProgressChanged(0f)
+            offsetY = 0f
+            dragging = true
+            onStartRecording()
+        }, onDragCancel = {
+            onCancelRecording()
+            dragging = false
+        }, onDragEnd = {
+            if (dragging) {
+                onFinishRecording()
+            }
+            dragging = false
+        }, onDrag = { change, dragAmount ->
+            if (dragging) {
+                onSwipeProgressChanged(horizontalSwipeProgress() + dragAmount.x)
+                offsetY += dragAmount.y
+                val offsetX = horizontalSwipeProgress()
+                if (offsetX < 0 && abs(offsetX) >= swipeToCancelThresholdPx && abs(offsetY) <= verticalThresholdPx) {
+                    onCancelRecording()
+                    dragging = false
                 }
             }
-        )
+        })
     }
 

@@ -17,6 +17,8 @@ import io.ak1.demo.ui.theme.StoryVoyageTheme
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
+const val ipAddress = "192.168.1.2"
+
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,14 +32,14 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-val ThemePrefs = staticCompositionLocalOf { ThemePreference() }
+val LocalThemePrefs = staticCompositionLocalOf { ThemePreference() }
 
 @Composable
 fun ThemeApp() {
     val themeViewModel: ThemeViewModel = koinViewModel()
     val themePreference by themeViewModel.themePreference.collectAsState()
     val navController = rememberNavController()
-    CompositionLocalProvider(ThemePrefs provides themePreference) {
+    CompositionLocalProvider(LocalThemePrefs provides themePreference) {
         StoryVoyageTheme(themePreference = themePreference) {
             AppNavigation(navController = navController)
         }

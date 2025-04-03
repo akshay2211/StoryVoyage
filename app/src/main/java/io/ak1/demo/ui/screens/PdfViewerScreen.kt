@@ -53,8 +53,8 @@ import com.pspdfkit.jetpack.compose.interactors.getDefaultDocumentManager
 import com.pspdfkit.jetpack.compose.interactors.rememberDocumentState
 import com.pspdfkit.jetpack.compose.views.DocumentView
 import io.ak1.demo.R
-import io.ak1.demo.ThemePrefs
-import io.ak1.demo.data.repository.DummyPdfData
+import io.ak1.demo.LocalThemePrefs
+import io.ak1.demo.data.repository.Books
 import io.ak1.demo.data.util.FileDataProvider
 import io.ak1.demo.presentation.viewer.PdfViewerEvent
 import io.ak1.demo.presentation.viewer.PdfViewerIntent
@@ -76,7 +76,7 @@ fun PdfViewerScreen(
     navigateBack: () -> Unit,
     viewModel: PdfViewerViewModel = koinViewModel<PdfViewerViewModel>()
 ) {
-    val pdf = DummyPdfData.pdfList.find { it.id == pdfId } ?: return
+    val pdf = Books.list.find { it.id == pdfId } ?: return
     val state by viewModel.state.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val context = LocalContext.current
@@ -110,10 +110,10 @@ fun PdfViewerScreen(
     }
 
     // Theme configuration
-    val isDark = if (ThemePrefs.current.themeMode == AppThemeMode.AUTO) {
+    val isDark = if (LocalThemePrefs.current.themeMode == AppThemeMode.AUTO) {
         isSystemInDarkTheme()
     } else {
-        ThemePrefs.current.themeMode == AppThemeMode.DARK
+        LocalThemePrefs.current.themeMode == AppThemeMode.DARK
     }
 
     // PDF configuration
@@ -214,6 +214,3 @@ fun PdfViewerScreen(
         }
     }
 }
-
-const val ipAddress = "192.168.1.2"
-const val sessionId = "custom-session-one"

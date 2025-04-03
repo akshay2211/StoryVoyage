@@ -72,8 +72,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import io.ak1.demo.data.repository.DummyPdfData
-import io.ak1.demo.domain.model.PdfDocument
+import io.ak1.demo.data.repository.Books
+import io.ak1.demo.domain.model.Book
 import io.ak1.demo.navigation.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -173,7 +173,7 @@ fun HomeContent(
             AnimatedSectionTitle(title = "Collections")
 
             Spacer(modifier = Modifier.height(8.dp))
-            val pdfList = DummyPdfData.pdfList
+            val pdfList = Books.list
             // Enhanced PDF Pager with animations
             EnhancedPdfPager(onPdfClick = onPdfClick, pdfList = pdfList)
         }
@@ -368,7 +368,7 @@ fun AnimatedSectionTitle(title: String) {
 @Composable
 fun EnhancedPdfPager(
     onPdfClick: (String) -> Unit,
-    pdfList: List<PdfDocument>
+    pdfList: List<Book>
 ) {
     InfiniteHorizontalPager(pdfList) { page, pdf ->
         AnimatedPdfCard(
@@ -381,9 +381,9 @@ fun EnhancedPdfPager(
 
 @Composable
 fun InfiniteHorizontalPager(
-    documents: List<PdfDocument>,
+    documents: List<Book>,
     modifier: Modifier = Modifier,
-    content: @Composable (page: Int, pdfDocument:PdfDocument) -> Unit
+    content: @Composable (page: Int, book:Book) -> Unit
 ) {
     // Don't create the pager if we have no documents
     if (documents.isEmpty()) {
@@ -425,7 +425,7 @@ fun InfiniteHorizontalPager(
 @Composable
 fun AnimatedPdfCard(
     modifier: Modifier,
-    pdf: PdfDocument,
+    pdf: Book,
     onClick: () -> Unit
 ) {
 

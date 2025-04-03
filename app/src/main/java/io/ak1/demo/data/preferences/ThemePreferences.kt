@@ -42,8 +42,8 @@ class ThemePreferencesDataSource(private val context: Context) {
         val themeModeValue = preferences[THEME_MODE_KEY] ?: ThemeMode.AUTO.value
 
         ThemePreferenceModel(
-            themeType = ThemeType.values().firstOrNull { it.value == themeTypeValue } ?: ThemeType.STATIC,
-            themeMode = ThemeMode.values().firstOrNull { it.value == themeModeValue } ?: ThemeMode.AUTO
+            themeType = ThemeType.entries.firstOrNull { it.value == themeTypeValue } ?: ThemeType.STATIC,
+            themeMode = ThemeMode.entries.firstOrNull { it.value == themeModeValue } ?: ThemeMode.AUTO
         )
     }
 

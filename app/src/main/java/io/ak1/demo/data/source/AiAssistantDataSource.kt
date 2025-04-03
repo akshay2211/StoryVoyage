@@ -5,7 +5,7 @@ import android.util.Log
 import com.pspdfkit.document.PdfDocument
 import com.pspdfkit.document.providers.DataProvider
 import io.ak1.demo.data.util.JwtGenerator
-import io.ak1.demo.ui.screens.ipAddress
+import io.ak1.demo.ipAddress
 import io.nutrient.data.models.AiAssistantConfiguration
 import io.nutrient.data.models.CompletionResponse
 import io.nutrient.data.models.DocumentIdentifiers

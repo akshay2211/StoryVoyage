@@ -1,6 +1,5 @@
 package io.ak1.demo.ui.components
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
@@ -44,17 +43,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.onFocusChanged
@@ -68,22 +63,13 @@ import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.ak1.demo.R
-import io.ak1.demo.data.voice.VoiceToTextParser
 import io.ak1.demo.ui.FunctionalityNotAvailablePopup
-import io.nutrient.data.models.CompletionResponse
-import io.nutrient.domain.ai.AiAssistant
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -91,6 +77,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun UserInput(
+    modifier: Modifier = Modifier,
     textFieldValue: String,
     onTextChanged: (String) -> Unit,
     onMessageSent: (String) -> Unit,
@@ -98,8 +85,7 @@ fun UserInput(
     onFinishRecording: () -> String,
     onCancelRecording: () -> Unit,
     isRecording: Boolean,
-    resetScroll: () -> Unit = {},
-    modifier: Modifier = Modifier
+    resetScroll: () -> Unit = {}
 ) {
     // Used to decide if the keyboard should be shown
     var textFieldFocusState by remember { mutableStateOf(false) }
@@ -141,10 +127,10 @@ fun UserInput(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .semantics {
-                                    contentDescription = "text-field"//stringResource(R.string.textfield_desc)
+                                    contentDescription =
+                                        "text-field"//stringResource(R.string.textfield_desc)
                                     keyboardShownProperty = textFieldFocusState
-                                }
-                        )
+                                })
                     }
                 }
             }
@@ -169,12 +155,10 @@ fun UserInput(
                         if (textFieldValue.isNotBlank()) {
                             onMessageSent(textFieldValue)
                         }
-                    },
-                    modifier = Modifier.alpha(if (recording) 0f else 1f)
+                    }, modifier = Modifier.alpha(if (recording) 0f else 1f)
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Outlined.Send,
-                        contentDescription = "Send"
+                        Icons.AutoMirrored.Outlined.Send, contentDescription = "Send"
                     )
                 }
             }
@@ -269,140 +253,7 @@ private fun NotAvailablePopup(onDismissed: () -> Unit) {
 val KeyboardShownKey = SemanticsPropertyKey<Boolean>("KeyboardShownKey")
 var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
 
-@ExperimentalFoundationApi
-@Composable
-private fun UserInputText(
-    keyboardType: KeyboardType = KeyboardType.Text,
-    onTextChanged: (TextFieldValue) -> Unit,
-    textFieldValue: TextFieldValue,
-    keyboardShown: Boolean,
-    onTextFieldFocused: (Boolean) -> Unit,
-    onMessageSent: (String) -> Unit,
-    onStartRecording: (Boolean) -> Boolean,
-    onFinishRecording: () -> Unit,
-    onCancelRecording: () -> Unit,
-    focusState: Boolean
-) {
-    val swipeOffset = remember { mutableStateOf(0f) }
-    var isRecordingMessage by remember { mutableStateOf(false) }
-    val a11ylabel = stringResource(id = R.string.textfield_desc)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
-    ) {
-        AnimatedContent(
-            targetState = isRecordingMessage,
-            label = "text-field",
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-        ) { recording ->
-            Box(Modifier.fillMaxSize()) {
-                if (recording) {
-                    RecordingIndicator { swipeOffset.value }
-                } else {
-                    UserInputTextField(
-                        textFieldValue,
-                        onTextChanged,
-                        onTextFieldFocused,
-                        keyboardType,
-                        focusState,
-                        onMessageSent,
-                        Modifier
-                            .fillMaxWidth()
-                            .semantics {
-                                contentDescription = a11ylabel
-                                keyboardShownProperty = keyboardShown
-                            })
-                }
-            }
-        }
-        RecordButton(
-            recording = isRecordingMessage,
-            swipeOffset = { swipeOffset.value },
-            onSwipeOffsetChange = { offset -> swipeOffset.value = offset },
-            onStartRecording = {
-                val consumed = !isRecordingMessage
-                isRecordingMessage = true
-                onStartRecording.invoke(consumed)
-                consumed
-            },
-            onFinishRecording = {
-                // handle end of recording
-                onFinishRecording.invoke()
-                isRecordingMessage = false
-            },
-            onCancelRecording = {
-                isRecordingMessage = false
-                onCancelRecording.invoke()
-            },
-            modifier = Modifier.fillMaxHeight()
-        )
-        AnimatedContent(
-            targetState = isRecordingMessage,
-            label = "send-button",
-            modifier = Modifier.fillMaxHeight()
-        ) { recording ->
 
-            IconButton(
-                onClick = { onMessageSent.invoke(textFieldValue.text) },
-                Modifier.alpha(if (recording) 0f else 1f)
-            ) {
-                Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = "Send")
-            }
-        }
-        Spacer(Modifier.width(8.dp))
-    }
-}
-
-@Composable
-private fun BoxScope.UserInputTextField(
-    textFieldValue: TextFieldValue,
-    onTextChanged: (TextFieldValue) -> Unit,
-    onTextFieldFocused: (Boolean) -> Unit,
-    keyboardType: KeyboardType,
-    focusState: Boolean,
-    onMessageSent: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var lastFocusState by remember { mutableStateOf(false) }
-    BasicTextField(
-        value = textFieldValue,
-        onValueChange = { onTextChanged(it) },
-        modifier = modifier
-            .padding(start = 32.dp)
-            .align(Alignment.CenterStart)
-            .onFocusChanged { state ->
-                if (lastFocusState != state.isFocused) {
-                    onTextFieldFocused(state.isFocused)
-                }
-                lastFocusState = state.isFocused
-            },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType,
-        ),
-        keyboardActions = KeyboardActions {
-            if (textFieldValue.text.isNotBlank()) onMessageSent(textFieldValue.text)
-        },
-        singleLine = false,
-        cursorBrush = SolidColor(LocalContentColor.current),
-        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
-    )
-
-    val disableContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    if (textFieldValue.text.isEmpty() && !focusState) {
-        Text(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 32.dp),
-            text = stringResource(R.string.textfield_hint),
-            style = MaterialTheme.typography.bodyLarge.copy(color = disableContentColor)
-        )
-    }
-}
 
 @Composable
 private fun RecordingIndicator(swipeOffset: () -> Float) {

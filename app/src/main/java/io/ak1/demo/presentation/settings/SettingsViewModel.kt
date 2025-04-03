@@ -29,10 +29,7 @@ data class SettingsState(
     val isLoading: Boolean = false
 )
 
-sealed class SettingsEffect {
-    data class ShowToast(val message: String) : SettingsEffect()
-    object NavigateBack : SettingsEffect()
-}
+
 
 class SettingsViewModel(
     private val themeUseCases: ThemeUseCases
