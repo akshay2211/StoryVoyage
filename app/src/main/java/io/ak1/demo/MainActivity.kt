@@ -1,0 +1,46 @@
+package io.ak1.demo
+
+import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.navigation.compose.rememberNavController
+import io.ak1.demo.domain.model.ThemePreference
+import io.ak1.demo.navigation.AppNavigation
+import io.ak1.demo.presentation.theme.ThemeViewModel
+import io.ak1.demo.ui.theme.StoryVoyageTheme
+import org.koin.compose.KoinContext
+import org.koin.compose.viewmodel.koinViewModel
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            KoinContext {
+                ThemeApp()
+            }
+        }
+    }
+}
+
+val ThemePrefs = staticCompositionLocalOf { ThemePreference() }
+
+@Composable
+fun ThemeApp() {
+    val themeViewModel: ThemeViewModel = koinViewModel()
+    val themePreference by themeViewModel.themePreference.collectAsState()
+    val navController = rememberNavController()
+    CompositionLocalProvider(ThemePrefs provides themePreference) {
+        StoryVoyageTheme(themePreference = themePreference) {
+            AppNavigation(navController = navController)
+        }
+    }
+
+}
