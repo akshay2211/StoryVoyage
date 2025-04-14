@@ -60,7 +60,7 @@ class PdfViewerViewModel(
                     pdfDocument,
                     dataProvider,
                     documentIdentifiers,
-                    false,  // Not a refresh
+                    true
                 )
 
                 _state.update {

@@ -1,6 +1,5 @@
 package io.ak1.demo.presentation.assistant
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ak1.demo.domain.model.VoiceRecognitionState
@@ -37,6 +36,11 @@ class AiAssistantViewModel(
 
     private val _state = MutableStateFlow(AiAssistantState())
     val state: StateFlow<AiAssistantState> = _state.asStateFlow()
+
+    override fun onCleared() {
+        super.onCleared()
+        _state.update { AiAssistantState() }
+    }
 
     private val _events = Channel<AiAssistantEvent>()
     val events = _events.receiveAsFlow()
@@ -204,6 +208,15 @@ class AiAssistantViewModel(
             )
         }
 
+        if (voiceState.error==null && voiceState.text.isNotEmpty()){
+            _state.update {
+                it.copy(
+                    inputText = voiceState.text
+                )
+
+            }
+        }
+
         voiceState.error?.let { error ->
             viewModelScope.launch {
                 _events.send(AiAssistantEvent.Error(error))
@@ -220,11 +233,10 @@ class AiAssistantViewModel(
     }
 
     fun startListening() {
-        Log.e("Akshay", "startListening: ")
         viewModelScope.launch {
-            sendMessageUseCase.getResponseStream().collectLatest { response ->
+            sendMessageUseCase.getResponseStream().collect { response ->
                 if (response == null) {
-                    Log.e("AiAssistantViewModel", "Response is null, handleAiResponse not called")
+                    // do nothing
                 } else {
                     handleAiResponse(response)
                 }

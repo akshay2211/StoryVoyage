@@ -8,7 +8,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.ak1.demo.domain.model.ThemeMode
 import io.ak1.demo.domain.model.ThemePreference
 import io.ak1.demo.domain.model.ThemeType
@@ -42,7 +45,24 @@ fun StoryVoyageTheme(
     }
 
     // Set transparent status bar with appropriate icon color
-    TransparentSystemBars(darkTheme = useDarkTheme)
+//    TransparentSystemBars(darkTheme = useDarkTheme)
+
+    val systemUiController = rememberSystemUiController()
+
+    SideEffect {
+        // Set transparent status bar
+        systemUiController.setStatusBarColor(
+            color = Color.Transparent,
+            darkIcons = !useDarkTheme // Use light icons for dark theme, dark icons for light theme
+        )
+
+        // Set transparent navigation bar
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            darkIcons = !useDarkTheme, // Use light icons for dark theme, dark icons for light theme
+            navigationBarContrastEnforced = false
+        )
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,

@@ -12,7 +12,6 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +32,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -49,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.onFocusChanged
@@ -64,7 +62,6 @@ import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.ak1.demo.R
@@ -81,15 +78,11 @@ fun UserInput(
     textFieldValue: String,
     onTextChanged: (String) -> Unit,
     onMessageSent: (String) -> Unit,
-    onStartRecording: () -> Boolean,
-    onFinishRecording: () -> String,
-    onCancelRecording: () -> Unit,
-    isRecording: Boolean,
+    onRecordingIconCLicked: () -> Unit,
     resetScroll: () -> Unit = {}
 ) {
     // Used to decide if the keyboard should be shown
     var textFieldFocusState by remember { mutableStateOf(false) }
-    var swipeOffset by remember { mutableStateOf(0f) }
 
     Surface(
         tonalElevation = 2.dp,
@@ -102,17 +95,8 @@ fun UserInput(
                 .height(64.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AnimatedContent(
-                targetState = isRecording,
-                label = "text-field",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) { recording ->
-                Box(Modifier.fillMaxSize()) {
-                    if (recording) {
-                        RecordingIndicator { swipeOffset }
-                    } else {
+
+                Box(Modifier.weight(1f)) {
                         UserInputTextField(
                             text = textFieldValue,
                             onTextChanged = onTextChanged,
@@ -131,37 +115,31 @@ fun UserInput(
                                         "text-field"//stringResource(R.string.textfield_desc)
                                     keyboardShownProperty = textFieldFocusState
                                 })
-                    }
                 }
+            IconButton({
+                onRecordingIconCLicked()
+            }) {
+                Icon(
+                    Icons.Default.Mic,
+                    contentDescription = "Record",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                )
             }
 
-            RecordButton(
-                recording = isRecording,
-                swipeOffset = { swipeOffset },
-                onSwipeOffsetChange = { offset -> swipeOffset = offset },
-                onStartRecording = onStartRecording,
-                onFinishRecording = { onFinishRecording() },
-                onCancelRecording = onCancelRecording,
-                modifier = Modifier.fillMaxHeight()
-            )
-
-            AnimatedContent(
-                targetState = isRecording,
-                label = "send-button",
-                modifier = Modifier.fillMaxHeight()
-            ) { recording ->
                 IconButton(
                     onClick = {
                         if (textFieldValue.isNotBlank()) {
                             onMessageSent(textFieldValue)
                         }
-                    }, modifier = Modifier.alpha(if (recording) 0f else 1f)
+                    }
                 ) {
                     Icon(
                         Icons.AutoMirrored.Outlined.Send, contentDescription = "Send"
                     )
                 }
-            }
 
             Spacer(Modifier.width(8.dp))
         }
@@ -252,64 +230,3 @@ private fun NotAvailablePopup(onDismissed: () -> Unit) {
 
 val KeyboardShownKey = SemanticsPropertyKey<Boolean>("KeyboardShownKey")
 var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
-
-
-
-@Composable
-private fun RecordingIndicator(swipeOffset: () -> Float) {
-    var duration by remember { mutableStateOf(Duration.ZERO) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(1000)
-            duration += 1.seconds
-        }
-    }
-    Row(
-        Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically
-    ) {
-        val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-
-        val animatedPulse = infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 0.2f,
-            animationSpec = infiniteRepeatable(
-                tween(2000), repeatMode = RepeatMode.Reverse
-            ),
-            label = "pulse",
-        )
-        Box(Modifier
-            .size(56.dp)
-            .padding(24.dp)
-            .graphicsLayer {
-                scaleX = animatedPulse.value; scaleY = animatedPulse.value
-            }
-            .clip(CircleShape)
-            .background(Color.Red))
-        Text(
-            duration.toComponents { minutes, seconds, _ ->
-                val min = minutes.toString().padStart(2, '0')
-                val sec = seconds.toString().padStart(2, '0')
-                "$min:$sec"
-            }, Modifier.alignByBaseline()
-        )
-        Box(
-            Modifier
-                .fillMaxSize()
-                .alignByBaseline()
-                .clipToBounds()
-        ) {
-            val swipeThreshold = with(LocalDensity.current) { 200.dp.toPx() }
-            Text(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .graphicsLayer {
-                        translationX = swipeOffset() / 2
-                        alpha = 1 - (swipeOffset().absoluteValue / swipeThreshold)
-                    },
-                textAlign = TextAlign.Center,
-                text = stringResource(R.string.swipe_to_cancel_recording),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-}

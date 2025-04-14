@@ -17,7 +17,7 @@ import io.ak1.demo.ui.theme.StoryVoyageTheme
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
-const val ipAddress = "192.168.1.2"
+const val ipAddress = "192.168.31.29"
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,5 +44,4 @@ fun ThemeApp() {
             AppNavigation(navController = navController)
         }
     }
-
 }

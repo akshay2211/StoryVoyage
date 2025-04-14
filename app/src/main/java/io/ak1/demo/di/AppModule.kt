@@ -35,7 +35,7 @@ val appModule = module {
     // Data Sources
     single { ThemePreferencesDataSource(get()) }
     single<VoiceRecognitionDataSource> { VoiceRecognitionDataSourceImpl(get()) }
-    single<AiAssistantDataSource> { AiAssistantDataSourceImpl(get()) }
+    factory<AiAssistantDataSource> { AiAssistantDataSourceImpl(get()) }
 
     // Repositories
     single<VoiceRecognitionRepository> { VoiceRecognitionRepositoryImpl(get()) }
@@ -61,6 +61,6 @@ val appModule = module {
     // ViewModels
     viewModelOf(::ThemeViewModel)
     viewModelOf(::SettingsViewModel)
-    viewModelOf(::AiAssistantViewModel)
     viewModelOf(::PdfViewerViewModel)
+    factory { AiAssistantViewModel(get(),get(),get(),get(),get(),get()) }
 }

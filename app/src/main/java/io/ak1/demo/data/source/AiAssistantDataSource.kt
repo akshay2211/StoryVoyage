@@ -14,6 +14,7 @@ import io.nutrient.domain.ai.standaloneAiAssistant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
+val titleRegex = Regex("[^a-zA-Z0-9]")
 /**
  * Data source for AI Assistant operations
  */
@@ -38,8 +39,6 @@ class AiAssistantDataSourceImpl(
     private val context: Context
 ) : AiAssistantDataSource {
 
-    val hashMap = HashMap<String, AiAssistant>()
-
     var aiAssistant: AiAssistant? = null
 
     override val responseState: Flow<CompletionResponse?>
@@ -54,8 +53,7 @@ class AiAssistantDataSourceImpl(
     ): Boolean {
 
         return try {
-            val session = pdfDocument.title?.replace(Regex("[^a-zA-Z0-9]"), "") ?: "default-session"
-            if (!hashMap.containsKey(session)) {
+            val session = pdfDocument.title?.replace(titleRegex, "") ?: "default-session"
                 val aiAssistantConfiguration = AiAssistantConfiguration(
                     "http://$ipAddress:4000", JwtGenerator.generateJwtToken(
                         context, claims = mapOf(
@@ -65,14 +63,9 @@ class AiAssistantDataSourceImpl(
                         )
                     ), session
                 )
-                val aiAssistant = standaloneAiAssistant(context, aiAssistantConfiguration)
-                hashMap.put(session, aiAssistant)
-                pdfDocument.setAiAssistant(aiAssistant)
-            }
-            aiAssistant = hashMap[session]
-            hashMap[session]?.terminate()
-            hashMap[session]?.initialize(dataProvider, documentIdentifiers, isRefresh)
-            hashMap[session]?.initializeSocketConnection(true)
+                aiAssistant = standaloneAiAssistant(context, aiAssistantConfiguration)
+                pdfDocument.setAiAssistant(aiAssistant!!)
+            aiAssistant?.initialize(dataProvider, documentIdentifiers, isRefresh)
             true
         } catch (e: Exception) {
             Log.e("AiAssistant", "Failed to initialize AI Assistant with document provider", e)
@@ -82,7 +75,6 @@ class AiAssistantDataSourceImpl(
 
     override suspend fun emitMessage(message: String, documentId: String) {
         val id = aiAssistant?.identifiers?.permanentId ?: ""
-        Log.e("AKshay", "emitMessage: $id  $message")
         aiAssistant?.emitMessage(message, id)
     }
 

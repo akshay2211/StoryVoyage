@@ -1,7 +1,6 @@
 package io.ak1.demo.ui.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -96,7 +95,6 @@ fun PdfViewerScreen(
     // Handle events
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
-            Log.e("Akshay", "PdfViewerScreen: $event")
             when (event) {
                 is PdfViewerEvent.Error -> {
                     snackbarHostState.showSnackbar(event.message)

@@ -328,7 +328,8 @@ fun AnimatedWelcomeBanner() {
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Discover and read your collections",
+                            text = "\nExperience the power of AI with this demo.\n\n" +
+                                    "See how easily you can customize and integrate an AI Assistant into your own app using the Nutrient SDK.",
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.White.copy(alpha = 0.8f)
                         )
