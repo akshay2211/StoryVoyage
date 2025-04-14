@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.commonmark.node.Text
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
@@ -70,54 +69,59 @@ fun AiAssistantScreen(
             }
         }
     }
-    Box(Modifier
-        .fillMaxSize()) {
-
-    Column(
-        Modifier
-            .imePadding()
-            .fillMaxSize().then(if (state.isRecording) Modifier.blur(12.dp) else Modifier)
+    Box(
+        Modifier.fillMaxSize()
     ) {
-        // Display voice recognition error if any
-        state.error?.let {
-            Text(it)
-        }
 
-        // Display partial text during recording
-        if (state.isRecording) {
-            Text(state.partialRecordingText)
-        }
-
-        // Messages list
-        Messages(
-            messages = state.messages,
-            navigateToProfile = { /* No-op or handle navigation */ },
-            modifier = Modifier
-                .weight(1f),
-            scrollState = scrollState
+        Column(
+            Modifier
+                .imePadding()
+                .fillMaxSize()
+                .then(if (state.isRecording) Modifier.blur(12.dp) else Modifier)
         ) {
-            viewModel.sendMessage(it)
+            // Display voice recognition error if any
+            state.error?.let {
+                Text(it)
+            }
+
+            // Display partial text during recording
+            if (state.isRecording) {
+                Text(state.partialRecordingText)
+            }
+
+            // Messages list
+            Messages(
+                messages = state.messages,
+                navigateToProfile = { /* No-op or handle navigation */ },
+                modifier = Modifier.weight(1f),
+                scrollState = scrollState
+            ) {
+                viewModel.sendMessage(it)
+            }
+
+
+            // User input with voice recording capabilities
+            UserInput(textFieldValue = state.inputText, onTextChanged = {
+                viewModel.processIntent(AiAssistantIntent.UpdateInputText(it))
+            }, onMessageSent = { message ->
+                viewModel.processIntent(AiAssistantIntent.SendMessage(message))
+            }, onRecordingIconCLicked = {
+                viewModel.processIntent(AiAssistantIntent.StartRecording)
+            }, resetScroll = {
+                scope.launch {
+                    scrollState.animateScrollToItem(Int.MAX_VALUE)
+                }
+            })
         }
 
-
-        // User input with voice recording capabilities
-        UserInput(textFieldValue = state.inputText, onTextChanged = {
-            viewModel.processIntent(AiAssistantIntent.UpdateInputText(it))
-        }, onMessageSent = { message ->
-            viewModel.processIntent(AiAssistantIntent.SendMessage(message))
-        }, onRecordingIconCLicked = {
-            viewModel.processIntent(AiAssistantIntent.StartRecording)
-        },  resetScroll = {
-            scope.launch {
-                scrollState.animateScrollToItem(Int.MAX_VALUE)
+        if (state.isRecording) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                androidx.compose.material3.Text(
+                    text = state.partialRecordingText,
+                    style = MaterialTheme.typography.displayLarge,
+                    textAlign = TextAlign.Center,
+                )
             }
-        })
+        }
     }
-
-    if (state.isRecording){
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-        androidx.compose.material3.Text(text = state.partialRecordingText,
-        style = MaterialTheme.typography.displayLarge,
-        textAlign = TextAlign.Center,
-    )}}}
 }

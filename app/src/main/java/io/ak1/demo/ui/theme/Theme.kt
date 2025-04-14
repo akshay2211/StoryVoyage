@@ -15,13 +15,11 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.ak1.demo.domain.model.ThemeMode
 import io.ak1.demo.domain.model.ThemePreference
 import io.ak1.demo.domain.model.ThemeType
-import io.ak1.demo.presentation.theme.TransparentSystemBars
 
 
 @Composable
 fun StoryVoyageTheme(
-    themePreference: ThemePreference,
-    content: @Composable () -> Unit
+    themePreference: ThemePreference, content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val systemInDarkTheme = isSystemInDarkTheme()
@@ -65,22 +63,16 @@ fun StoryVoyageTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        colorScheme = colorScheme, typography = Typography, content = content
     )
 }
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
