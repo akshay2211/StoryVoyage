@@ -71,21 +71,23 @@ import io.ak1.demo.domain.model.ThemeMode as AppThemeMode
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalStdlibApi::class)
 @Composable
 fun PdfViewerScreen(
-    pdfId: String,
+    id: String,
+    chat: Boolean,
     navigateBack: () -> Unit,
     viewModel: PdfViewerViewModel = koinViewModel<PdfViewerViewModel>()
 ) {
-    val pdf = Books.list.find { it.id == pdfId } ?: return
+    val book = Books.list.find { it.id == id } ?: return
     val state by viewModel.state.collectAsState()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerInitialValue = if (chat) DrawerValue.Open else DrawerValue.Closed
+    val drawerState = rememberDrawerState(initialValue = drawerInitialValue)
     val context = LocalContext.current
     val cacheDir = context.cacheDir
-    val pdfFile = File(cacheDir, "${pdf.title}.pdf")
+    val file = File(cacheDir, "${book.title}.pdf")
     val dataProvider: DataProvider by remember {
         mutableStateOf(
             UrlDataProvider(
-                java.net.URL(pdf.pdfUrl),
-                pdfFile
+                java.net.URL(book.pdfUrl),
+                file
             )
         )
     }
@@ -150,7 +152,7 @@ fun PdfViewerScreen(
                                 viewModel.processIntent(
                                     PdfViewerIntent.InitializeAiAssistant(
                                         pdfDocument,
-                                        FileDataProvider(pdfFile),
+                                        FileDataProvider(file),
                                         DocumentIdentifiers(permanentId, changeId)
                                     )
                                 )

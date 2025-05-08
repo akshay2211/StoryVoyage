@@ -102,7 +102,7 @@ fun Messages(
         JumpToBottom(
             enabled = jumpToBottomButtonEnabled, onClicked = {
                 scope.launch {
-                    scrollState.animateScrollToItem(Int.MAX_VALUE)
+                    scrollState.requestScrollToItem(Int.MAX_VALUE)
                 }
             }, modifier = Modifier.align(Alignment.BottomCenter)
         )

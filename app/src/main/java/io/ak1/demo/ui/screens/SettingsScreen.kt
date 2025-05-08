@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import io.ak1.demo.domain.model.ThemeMode
 import io.ak1.demo.domain.model.ThemeType
 import io.ak1.demo.presentation.settings.SettingsIntent
@@ -49,8 +48,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navController: NavController,
-    viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>()
+    viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>(),
+    navTo:()-> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -59,7 +58,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = { navTo.invoke() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
                 }

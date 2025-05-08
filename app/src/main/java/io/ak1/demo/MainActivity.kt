@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -17,7 +19,7 @@ import io.ak1.demo.ui.theme.StoryVoyageTheme
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
-const val ipAddress = "192.168.31.29"
+const val ipAddress = "192.168.1.9"
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,14 +36,16 @@ class MainActivity : AppCompatActivity() {
 
 val LocalThemePrefs = staticCompositionLocalOf { ThemePreference() }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ThemeApp() {
     val themeViewModel: ThemeViewModel = koinViewModel()
     val themePreference by themeViewModel.themePreference.collectAsState()
-    val navController = rememberNavController()
     CompositionLocalProvider(LocalThemePrefs provides themePreference) {
         StoryVoyageTheme(themePreference = themePreference) {
-            AppNavigation(navController = navController)
-        }
+            SharedTransitionLayout {
+                val navController = rememberNavController()
+            AppNavigation(navController, this)
+        }}
     }
 }

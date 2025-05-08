@@ -1,6 +1,11 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package io.ak1.demo.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -16,8 +21,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,12 +30,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalPolice
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -69,7 +77,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import io.ak1.demo.data.repository.Books
@@ -82,13 +89,16 @@ import kotlin.math.roundToInt
 
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    navTo: (String) -> Unit,
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
+        drawerState = drawerState, drawerContent = {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -105,8 +115,22 @@ fun HomeScreen(navController: NavController) {
                         scope.launch {
                             drawerState.close()
                         }
-                    }
-                )
+                    })
+                NavigationDrawerItem(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    label = { Text(text = "Resources and Licenses") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navTo(Screen.Resources.route)
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.LocalPolice, contentDescription = "Licences"
+                        )
+                    })
                 NavigationDrawerItem(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     label = { Text(text = "Settings") },
@@ -114,50 +138,46 @@ fun HomeScreen(navController: NavController) {
                     onClick = {
                         scope.launch {
                             drawerState.close()
-                            navController.navigate(Screen.Settings.route)
+                            navTo(Screen.Settings.route)
                         }
                     },
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            imageVector = Icons.Default.Settings, contentDescription = "Settings"
                         )
-                    }
-                )
+                    })
             }
-        }
-    ) {
+        }) {
         HomeContent(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
             onMenuClick = {
                 scope.launch {
                     drawerState.open()
                 }
             },
             onPdfClick = { pdfId ->
-                navController.navigate(Screen.PdfReader.createRoute(pdfId))
-            }
-        )
+                navTo(Screen.Details.createRoute(pdfId))
+            })
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onMenuClick: () -> Unit,
     onPdfClick: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Story Voyage") },
-                navigationIcon = {
-                    IconButton(onClick = onMenuClick) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                    }
+            TopAppBar(title = { Text("Story Voyage") }, navigationIcon = {
+                IconButton(onClick = onMenuClick) {
+                    Icon(Icons.Default.Menu, contentDescription = "Menu")
                 }
-            )
-        }
-    ) { padding ->
+            })
+        }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -175,7 +195,12 @@ fun HomeContent(
             Spacer(modifier = Modifier.height(8.dp))
             val pdfList = Books.list
             // Enhanced PDF Pager with animations
-            EnhancedPdfPager(onPdfClick = onPdfClick, pdfList = pdfList)
+            EnhancedPdfPager(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                onPdfClick = onPdfClick,
+                pdfList = pdfList
+            )
         }
     }
 }
@@ -189,11 +214,8 @@ fun AnimatedWelcomeBanner() {
     // Animated gradient colors
     val infiniteTransition = rememberInfiniteTransition(label = "gradientTransition")
     val gradientPosition by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+        initialValue = 0f, targetValue = 1f, animationSpec = infiniteRepeatable(
+            animation = tween(10000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse
         ), label = "gradientPosition"
     )
 
@@ -204,8 +226,7 @@ fun AnimatedWelcomeBanner() {
     // Card scale animation on tap
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.98f else 1f,
-        animationSpec = tween(150), label = "cardScale"
+        targetValue = if (isPressed) 0.98f else 1f, animationSpec = tween(150), label = "cardScale"
     )
 
     // Start entry animations
@@ -231,12 +252,8 @@ fun AnimatedWelcomeBanner() {
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(1000)) +
-                slideInVertically(
-                    animationSpec = tween(1000),
-                    initialOffsetY = { it / 2 }
-                )
-    ) {
+        enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(
+            animationSpec = tween(1000), initialOffsetY = { it / 2 })) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -244,38 +261,33 @@ fun AnimatedWelcomeBanner() {
                 .padding(horizontal = 16.dp)
                 .scale(scale)
                 .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            isPressed = true
-                            tryAwaitRelease()
-                            isPressed = false
-                        },
-                        onTap = { /* Handle tap if needed */ }
-                    )
+                    detectTapGestures(onPress = {
+                        isPressed = true
+                        tryAwaitRelease()
+                        isPressed = false
+                    }, onTap = { /* Handle tap if needed */ })
                 },
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 // Dynamic background with parallax effect
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(dynamicGradient)
-                        .offset { IntOffset(
-                            (offsetX * 15).roundToInt(),
-                            (offsetY * 10).roundToInt()
-                        ) }
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = { position ->
-                                    // Calculate normalized position for parallax
-                                    offsetX = position.x / size.width - 0.5f
-                                    offsetY = position.y / size.height - 0.5f
-                                }
-                            )
-                        }
-                ) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(dynamicGradient)
+                    .offset {
+                        IntOffset(
+                            (offsetX * 15).roundToInt(), (offsetY * 10).roundToInt()
+                        )
+                    }
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = { position ->
+                                // Calculate normalized position for parallax
+                                offsetX = position.x / size.width - 0.5f
+                                offsetY = position.y / size.height - 0.5f
+                            })
+                    }) {
                     // Optional decorative elements
                     Box(
                         modifier = Modifier
@@ -300,8 +312,7 @@ fun AnimatedWelcomeBanner() {
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.7f)
+                                    Color.Transparent, Color.Black.copy(alpha = 0.7f)
                                 )
                             )
                         )
@@ -310,12 +321,8 @@ fun AnimatedWelcomeBanner() {
                 // Welcome text with fade-in animation
                 this@Card.AnimatedVisibility(
                     visible = showTextElements,
-                    enter = fadeIn(animationSpec = tween(1000)) +
-                            slideInVertically(
-                                animationSpec = tween(1000),
-                                initialOffsetY = { it / 3 }
-                            )
-                ) {
+                    enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(
+                        animationSpec = tween(1000), initialOffsetY = { it / 3 })) {
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -328,8 +335,7 @@ fun AnimatedWelcomeBanner() {
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "\nExperience the power of AI with this demo.\n\n" +
-                                    "See how easily you can customize and integrate an AI Assistant into your own app using the Nutrient SDK.",
+                            text = "\nExperience the power of AI with this demo.\n\n" + "See how easily you can customize and integrate an AI Assistant into your own app using the Nutrient SDK.",
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.White.copy(alpha = 0.8f)
                         )
@@ -351,32 +357,37 @@ fun AnimatedSectionTitle(title: String) {
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(800)) +
-                slideInVertically(
-                    animationSpec = tween(800),
-                    initialOffsetY = { it / 4 }
-                )
-    ) {
+        enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
+            animationSpec = tween(800), initialOffsetY = { it / 4 })) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         )
     }
 }
 
 @Composable
 fun EnhancedPdfPager(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onPdfClick: (String) -> Unit,
     pdfList: List<Book>
 ) {
-    InfiniteHorizontalPager(pdfList) { page, pdf ->
-        AnimatedPdfCard(
-            modifier = Modifier,
-            pdf = pdf,
-            onClick = { onPdfClick(pdf.id) },
-        )
+//    InfiniteHorizontalPager(pdfList) { page, pdf ->
+    LazyColumn {
+        items(pdfList) {
+            AnimatedPdfCard(
+                modifier = Modifier,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                book = it,
+                onClick = { onPdfClick(it.id) },
+            )
+        }
     }
 }
 
@@ -384,7 +395,7 @@ fun EnhancedPdfPager(
 fun InfiniteHorizontalPager(
     documents: List<Book>,
     modifier: Modifier = Modifier,
-    content: @Composable (page: Int, book:Book) -> Unit
+    content: @Composable (page: Int, book: Book) -> Unit
 ) {
     // Don't create the pager if we have no documents
     if (documents.isEmpty()) {
@@ -404,13 +415,13 @@ fun InfiniteHorizontalPager(
     val initialPage = virtualPageCount / 2
 
     val pagerState = rememberPagerState(
-        initialPage = initialPage,
-        pageCount = { virtualPageCount }
-    )
+        initialPage = initialPage, pageCount = { virtualPageCount })
 
     HorizontalPager(
         state = pagerState,
-        modifier = modifier.fillMaxWidth().height(480.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(480.dp),
         pageSize = PageSize.Fixed(296.dp),
         contentPadding = PaddingValues(start = 16.dp)
 
@@ -426,59 +437,73 @@ fun InfiniteHorizontalPager(
 @Composable
 fun AnimatedPdfCard(
     modifier: Modifier,
-    pdf: Book,
+    book: Book,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onClick: () -> Unit
 ) {
-
+    with(sharedTransitionScope) {
         Card(
             modifier = modifier
-                .width(280.dp)
-                .fillMaxHeight()
+                .fillMaxWidth()
+                .padding(12.dp)
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Column {
-                // Thumbnail with parallax effect
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(pdf.thumbnailUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = pdf.title,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+            Row {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current).data(book.thumbnailUrl)
+                        .crossfade(true).build(),
+                    contentDescription = book.title,
+                    modifier = Modifier
+                        .width(180.dp)
+                        .height(140.dp)
+                        .sharedElement(
+                            sharedContentState = rememberSharedContentState(key = "image_${book.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
+                    contentScale = ContentScale.Crop
+                )
 
-                    // Add a subtle gradient overlay for better text visibility
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.background.copy(alpha = 0.4f)
-                                    ),
-                                    startY = 300f
-                                )
-                            )
-                    ){
-                        // Title with subtle animation
-                        Text(
-                            modifier = Modifier.align(Alignment.BottomCenter).padding(12.dp),
-                            text = pdf.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+
+                Column(Modifier
+                    .weight(1f, true)
+                    .padding(12.dp)) {
+                    Text(
+                        modifier = Modifier.sharedElement(
+                                sharedContentState = rememberSharedContentState(key = "title_${book.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            ),
+                        text = book.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(Modifier.height(4.dp))
+
+                    Text(
+                        modifier = Modifier,
+                        text = book.author,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        modifier = Modifier,
+                        text = book.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
 
+
             }
+
+        }
     }
 }

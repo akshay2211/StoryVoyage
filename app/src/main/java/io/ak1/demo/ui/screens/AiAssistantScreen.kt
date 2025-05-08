@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.ak1.demo.presentation.assistant.AiAssistantEvent
@@ -40,6 +41,7 @@ fun AiAssistantScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(pdfState.isAiAssistantInitialized) {
         if (pdfState.isAiAssistantInitialized) {
@@ -58,12 +60,12 @@ fun AiAssistantScreen(
                 }
 
                 is AiAssistantEvent.MessageSent -> {
-                    // Handle message sent confirmation if needed
+                    focusManager.clearFocus()
                 }
 
                 is AiAssistantEvent.ScrollToBottom -> {
                     if (state.messages.isNotEmpty()) {
-                        scrollState.animateScrollToItem(Int.MAX_VALUE)
+                        scrollState.requestScrollToItem(Int.MAX_VALUE)
                     }
                 }
             }
@@ -82,11 +84,6 @@ fun AiAssistantScreen(
             // Display voice recognition error if any
             state.error?.let {
                 Text(it)
-            }
-
-            // Display partial text during recording
-            if (state.isRecording) {
-                Text(state.partialRecordingText)
             }
 
             // Messages list
@@ -109,7 +106,7 @@ fun AiAssistantScreen(
                 viewModel.processIntent(AiAssistantIntent.StartRecording)
             }, resetScroll = {
                 scope.launch {
-                    scrollState.animateScrollToItem(Int.MAX_VALUE)
+                    scrollState.requestScrollToItem(Int.MAX_VALUE)
                 }
             })
         }
@@ -118,7 +115,7 @@ fun AiAssistantScreen(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 androidx.compose.material3.Text(
                     text = state.partialRecordingText,
-                    style = MaterialTheme.typography.displayLarge,
+                    style = MaterialTheme.typography.displayMedium,
                     textAlign = TextAlign.Center,
                 )
             }
