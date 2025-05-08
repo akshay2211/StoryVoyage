@@ -6,29 +6,9 @@ StoryVoyage is an Android application designed to provide an immersive reading e
 ## 🛠 Demo
 Experience the app's features in action with a fully interactive walkthrough.
 
-<table>
-  <tr>
-    <td><b>AI Assistant in Action</b></td>
-    <td><b>Theme Overview</b></td>
-    <td><b>PDF Viewer Showcase</b></td>
-    <td><b>Voice Recognition Demo</b></td>
-
-  </tr>
-  <tr>
-    <td>
-      <video src="demo/ai-chat.mov" width="360" height="800" controls></video>
-    </td>
-    <td>
-      <video src="demo/theme.mov" width="360" height="800" controls></video>
-    </td>
-    <td>
-      <video src="demo/reader.mov" width="360" height="800" controls></video>
-    </td>
-    <td>
-      <video src="demo/voice-recognition.mov" width="360" height="800" controls></video>
-    </td>
-  </tr>
-</table>
+| AI Assistant in Action | Theme Overview | PDF Viewer Showcase | Voice Recognition Demo |
+| --- | --- | --- | --- |
+| <video src="https://github.com/user-attachments/assets/3e377f13-ba76-4cb6-b253-c4208619b25a"  controls="controls"></video> | <video src="https://github.com/user-attachments/assets/d8789d1a-3ec8-4e29-b65e-6f78c1020b74"  controls="controls"></video> | <video src="https://github.com/user-attachments/assets/ab5c62d1-acb4-4b0a-b6d4-23647019a7b4"  controls="controls"></video> | <video src="https://github.com/user-attachments/assets/e5066a57-4723-4008-a376-1d16a86c796e"  controls="controls"></video> |
 
 ## 🚀 Features
 
@@ -43,7 +23,7 @@ Experience the app's features in action with a fully interactive walkthrough.
 - **Programming Language**: Kotlin
 - **Frameworks**: Jetpack Compose, Koin, PSPDFKit
 - **Dependency Injection**: Koin
-- **PDF Rendering**: PSPDFKit
+- **PDF Rendering**: Nutrient (PSPDFKit)
 - **Build Tool**: Gradle
 
 ## 📂 Project Structure
