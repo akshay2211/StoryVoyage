@@ -39,9 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.pspdfkit.Nutrient
 import com.pspdfkit.document.DocumentSource
-import com.pspdfkit.document.PdfDocument
 import com.pspdfkit.document.PdfDocumentLoader
 import com.pspdfkit.document.providers.DataProvider
 import com.pspdfkit.document.providers.UrlDataProvider
@@ -59,11 +57,13 @@ import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun DetailScreen(id: String,
-                 sharedTransitionScope: SharedTransitionScope,
-                 animatedVisibilityScope : AnimatedVisibilityScope,
-                 viewModel: PdfViewerViewModel = koinViewModel<PdfViewerViewModel>(),
-                 navTo :(String) -> Unit) {
+fun DetailScreen(
+    id: String,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    viewModel: PdfViewerViewModel = koinViewModel<PdfViewerViewModel>(),
+    navTo: (String) -> Unit
+) {
     val book = Books.list.find { it.id == id } ?: return
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -74,8 +74,7 @@ fun DetailScreen(id: String,
     val dataProvider: DataProvider by remember {
         mutableStateOf(
             if (file.exists()) FileDataProvider(file) else UrlDataProvider(
-                java.net.URL(book.pdfUrl),
-                file
+                java.net.URL(book.pdfUrl), file
             )
         )
     }
@@ -84,16 +83,11 @@ fun DetailScreen(id: String,
         scope.launch {
             PdfDocumentLoader.openDocumentAsync(context, documentSource)
                 .subscribeOn(Schedulers.io()) // Run on background thread
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { pdfDocument, onError ->
-                    if (onError != null) {
-                        Log.e("Akshay", "DetailScreen: ${onError.message}")
-                    }
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { pdfDocument, onError ->
                     if (pdfDocument == null) return@subscribe
                     val permanentId = pdfDocument.permanentId.toHexString()
                     val changeId = pdfDocument.changeId.toHexString()
 
-                    Log.e("Akshay", "DetailScreen: ${pdfDocument.title}",)
                     viewModel.processIntent(
                         PdfViewerIntent.InitializeAiAssistant(
                             pdfDocument,
@@ -105,9 +99,11 @@ fun DetailScreen(id: String,
         }
     }
     Scaffold(bottomBar = {
-        Row(modifier = Modifier.padding(12.dp),
+        Row(
+            modifier = Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,) {
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Button({
                 navTo.invoke(Screen.Reader.createRoute(book.id))
             }, modifier = Modifier.weight(1f, true)) {
@@ -116,21 +112,18 @@ fun DetailScreen(id: String,
             Spacer(Modifier.width(12.dp))
             Button({
                 navTo.invoke(Screen.Reader.createRoute(book.id, true))
-            }, modifier = Modifier.weight(1f, true),
-                enabled = state.isAiAssistantInitialized) {
+            }, modifier = Modifier.weight(1f, true), enabled = state.isAiAssistantInitialized) {
                 Text("Chat")
             }
         }
     }) { innerPadding ->
-        with(sharedTransitionScope){
+        with(sharedTransitionScope) {
             LazyColumn(Modifier.padding(innerPadding)) {
                 item {
-                    Box{
+                    Box {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(book.thumbnailUrl)
-                                .crossfade(true)
-                                .build(),
+                                .data(book.thumbnailUrl).crossfade(true).build(),
                             contentDescription = book.title,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -141,16 +134,18 @@ fun DetailScreen(id: String,
                             contentScale = ContentScale.FillWidth
                         )
 
-                        IconButton(onClick = {
-                            navTo.invoke(Screen.Home.route)
-                        }, modifier = Modifier
-                            .padding(12.dp)
-                            .align(Alignment.TopEnd)
-                            .sharedElement(
-                                sharedContentState = rememberSharedContentState(key = "close_${book.id}"),
-                                animatedVisibilityScope = animatedVisibilityScope
-                            )
-                        ){
+                        IconButton(
+                            onClick = {
+                                navTo.invoke(Screen.Home.route)
+                            },
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .align(Alignment.TopEnd)
+                                .sharedElement(
+                                    sharedContentState = rememberSharedContentState(key = "close_${book.id}"),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                )
+                        ) {
                             Icon(Icons.Default.Close, contentDescription = "CLose")
                         }
                     }
@@ -174,17 +169,24 @@ fun DetailScreen(id: String,
 
 
                 item {
-                    Text("Author: ${book.author}",modifier = Modifier.padding(horizontal = 12.dp),
-                        style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Author: ${book.author}",
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        book.description,modifier = Modifier.padding(horizontal = 12.dp),
-                        style = MaterialTheme.typography.bodyMedium) }
+                        book.description,
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
+            }
 
-
-            }}
 
         }
+    }
+
+}
 
