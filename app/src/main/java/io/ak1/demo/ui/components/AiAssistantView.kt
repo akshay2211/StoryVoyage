@@ -16,8 +16,6 @@ import io.ak1.demo.ui.screens.AiAssistantScreen
 fun AiAssistantView(
     viewModel: PdfViewerViewModel
 ) {
-//    val state by viewModel.state.collectAsState()
-
     Column(
         verticalArrangement = Arrangement.Bottom,
         modifier = Modifier.fillMaxWidth()
