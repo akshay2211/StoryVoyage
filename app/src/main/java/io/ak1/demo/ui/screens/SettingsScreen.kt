@@ -49,8 +49,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navController: NavController,
-    viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>()
+    viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>(),
+    navTo:()-> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -59,7 +59,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = { navTo.invoke() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
