@@ -55,7 +55,7 @@ Experience the app's features in action with a fully interactive walkthrough.
     - Android Studio will automatically detect the `build.gradle` files and sync the project.
     - If not, click on "File" > "Sync Project with Gradle Files".
 
-4. **Add Nutrient license key**:
+4. **Add RSA key**:
     - Place your RSA private key in the `app/src/main/assets/keys/jwt.pem` file.
     - A jwt.pem file contains an RSA private key in PEM (Privacy Enhanced Mail) format that's used for signing JSON Web Tokens (JWTs).
 
