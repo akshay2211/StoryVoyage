@@ -32,6 +32,7 @@ sealed class Screen(val route: String) {
 fun AppNavigation(
     navController: NavHostController, sharedTransitionScope: SharedTransitionScope
 ) {
+
     NavHost(navController = navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) {
             HomeScreen(sharedTransitionScope, this) { navController.navigate(it) }

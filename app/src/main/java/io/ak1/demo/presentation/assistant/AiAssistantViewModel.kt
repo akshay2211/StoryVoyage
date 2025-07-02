@@ -3,12 +3,8 @@ package io.ak1.demo.presentation.assistant
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ak1.demo.domain.model.VoiceRecognitionState
-import io.ak1.demo.domain.usecase.InitializeAiAssistantUseCase
-import io.ak1.demo.domain.usecase.SendMessageUseCase
-import io.ak1.demo.domain.usecase.TerminateAiAssistantUseCase
-import io.ak1.demo.domain.usecase.voice.CancelVoiceRecognitionUseCase
-import io.ak1.demo.domain.usecase.voice.StartVoiceRecognitionUseCase
-import io.ak1.demo.domain.usecase.voice.StopVoiceRecognitionUseCase
+import io.ak1.demo.domain.repository.AiAssistantRepository
+import io.ak1.demo.domain.repository.VoiceRecognitionRepository
 import io.nutrient.data.models.AiAssistantEvents
 import io.nutrient.data.models.CompletionResponse
 import io.nutrient.data.models.Issuer
@@ -26,12 +22,8 @@ import java.util.Date
 import java.util.Locale
 
 class AiAssistantViewModel(
-    private val sendMessageUseCase: SendMessageUseCase,
-    private val initializeAiAssistantUseCase: InitializeAiAssistantUseCase,
-    private val terminateAiAssistantUseCase: TerminateAiAssistantUseCase,
-    private val startVoiceRecognitionUseCase: StartVoiceRecognitionUseCase,
-    private val stopVoiceRecognitionUseCase: StopVoiceRecognitionUseCase,
-    private val cancelVoiceRecognitionUseCase: CancelVoiceRecognitionUseCase
+    private val aiAssistantRepository: AiAssistantRepository,
+    private val voiceRecognitionRepository: VoiceRecognitionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AiAssistantState())
@@ -48,7 +40,7 @@ class AiAssistantViewModel(
     // Collect voice recognition state and AI responses
     init {
         viewModelScope.launch {
-            startVoiceRecognitionUseCase.voiceState.collectLatest { voiceState ->
+            voiceRecognitionRepository.voiceState.collectLatest { voiceState ->
                 updateVoiceState(voiceState)
             }
         }
@@ -83,7 +75,7 @@ class AiAssistantViewModel(
                 val documentId = _state.value.currentDocumentId ?: "default"
 
                 // Send message to AI Assistant
-                sendMessageUseCase.execute(message, documentId)
+                aiAssistantRepository.sendMessage(message, documentId)
 
                 // The response will be handled by the flow collector in init
             } catch (e: Exception) {
@@ -161,7 +153,7 @@ class AiAssistantViewModel(
     private fun startRecording() {
         viewModelScope.launch {
             try {
-                startVoiceRecognitionUseCase.execute()
+                voiceRecognitionRepository.startRecognition()
                 _state.update { it.copy(isRecording = true) }
             } catch (e: Exception) {
                 _events.send(AiAssistantEvent.Error("Error starting voice recording: ${e.message}"))
@@ -172,7 +164,7 @@ class AiAssistantViewModel(
     private fun stopRecording() {
         viewModelScope.launch {
             try {
-                val recognizedText = stopVoiceRecognitionUseCase.execute()
+                val recognizedText = voiceRecognitionRepository.stopRecognition()
                 _state.update {
                     it.copy(
                         inputText = recognizedText, isRecording = false, partialRecordingText = ""
@@ -188,7 +180,7 @@ class AiAssistantViewModel(
     private fun cancelRecording() {
         viewModelScope.launch {
             try {
-                cancelVoiceRecognitionUseCase.execute()
+                voiceRecognitionRepository.cancelRecognition()
                 _state.update {
                     it.copy(
                         isRecording = false, partialRecordingText = ""
@@ -234,7 +226,7 @@ class AiAssistantViewModel(
 
     fun startListening() {
         viewModelScope.launch {
-            sendMessageUseCase.getResponseStream().collect { response ->
+            aiAssistantRepository.responseStream.collect { response ->
                 if (response == null) {
                     // do nothing
                 } else {
