@@ -41,13 +41,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.ak1.demo.R
 import io.ak1.demo.presentation.assistant.getDate
+import io.nutrient.data.models.AiAssistantEvents
 import io.nutrient.data.models.CompletionResponse
 import io.nutrient.data.models.Issuer
 import io.nutrient.data.models.Issuer.Companion.value
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -55,17 +59,21 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val ConversationTestTag = "ConversationTestTag"
-private val ChatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
+private val ChatBlockShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
 
 @Composable
 fun Messages(
-    messages: List<CompletionResponse>,
+    messages: ImmutableList<CompletionResponse>,
     navigateToProfile: (String) -> Unit,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onClick: (String) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
+
+    val canScrollForward by remember(messages) {
+        derivedStateOf { scrollState.canScrollForward }
+    }
 
     Box(modifier = modifier) {
         LazyColumn(
@@ -86,23 +94,10 @@ fun Messages(
             }
         }
 
-        val jumpToBottomButtonEnabled by remember {
-            derivedStateOf {
-                // Check if we're NOT at the bottom of the list
-                // In a standard layout, the last item index is (itemCount - 1)
-                val lastVisibleItem =
-                    scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                val totalItems = scrollState.layoutInfo.totalItemsCount
-
-                // Show button if we're not seeing the last item (bottom of the list)
-                totalItems > 0 && lastVisibleItem < totalItems - 1
-            }
-        }
-
         JumpToBottom(
-            enabled = jumpToBottomButtonEnabled, onClicked = {
+            enabled = canScrollForward, onClicked = {
                 scope.launch {
-                    scrollState.requestScrollToItem(Int.MAX_VALUE)
+                        scrollState.animateScrollToItem(messages.lastIndex, Int.MAX_VALUE)
                 }
             }, modifier = Modifier.align(Alignment.BottomCenter)
         )
@@ -130,7 +125,6 @@ fun MessageItem(
                     .padding(horizontal = 16.dp)
                     .size(42.dp)
                     .border(1.5.dp, borderColor, CircleShape)
-//                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
                     .clip(CircleShape)
                     .align(Alignment.Top)
                     .padding(6.dp),
@@ -141,7 +135,6 @@ fun MessageItem(
                     if (isUserMessage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
                 )
             )
-//            } ?: Spacer(modifier = Modifier.width(74.dp))
 
             // Message content
             Column(
@@ -172,8 +165,8 @@ fun MessageItem(
                     }
                 }
 
-                // Message bubble
-                ChatBubble(
+                // Message Block
+                ChatBlock(
                     message = message, isUserMessage = isUserMessage,
                     onClick = onClick
                 )
@@ -183,11 +176,11 @@ fun MessageItem(
 }
 
 @Composable
-fun ChatBubble(
+fun ChatBlock(
     message: CompletionResponse, isUserMessage: Boolean,
     onClick: (String) -> Unit = {}
 ) {
-    val backgroundBubbleColor = if (isUserMessage) {
+    val backgroundBlockColor = if (isUserMessage) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.surfaceVariant
@@ -200,8 +193,8 @@ fun ChatBubble(
     }
 
     Surface(
-        color = backgroundBubbleColor,
-        shape = ChatBubbleShape,
+        color = backgroundBlockColor,
+        shape = ChatBlockShape,
         modifier = Modifier.padding(top = 4.dp)
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -214,13 +207,13 @@ fun ChatBubble(
                     modifier = Modifier.padding(16.dp),
                     textAlign = TextAlign.Start
                 )
-                message.suggestions?.let {
-                    it.forEach {
+                message.suggestions?.let { suggestions ->
+                    suggestions.forEach { suggestion ->
                         OutlinedButton(
-                            {onClick.invoke(it.text)},
+                            {onClick.invoke(suggestion.text)},
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(it.text)
+                            Text(suggestion.text)
                         }
                     }
                     Spacer(Modifier.height(4.dp))
@@ -310,4 +303,115 @@ fun List<CompletionResponse>.withDateDividers(): List<ChatListItem> {
     }
 
     return items
+}
+
+// Preview functions
+@Preview(showBackground = true)
+@Composable
+fun MessagesPreview() {
+    val sampleMessages = persistentListOf(
+        CompletionResponse(
+            content = "Hello! How can I help you today?",
+            sender = Issuer.AI.value(),
+            timestamp = System.currentTimeMillis() - 60000,
+            state = AiAssistantEvents.Success,
+            end = true,
+            suggestions = null
+        ),
+        CompletionResponse(
+            content = "I need help with my latest project.",
+            sender = Issuer.HUMAN.value(),
+            timestamp = System.currentTimeMillis(),
+            state = AiAssistantEvents.Success,
+            end = true
+        )
+    )
+    Messages(
+        messages = sampleMessages,
+        navigateToProfile = {},
+        scrollState = LazyListState()
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MessageItemPreview() {
+    val userMessage = CompletionResponse(
+        content = "This is a user message with some longer content to show how it looks when wrapped.",
+        sender = Issuer.HUMAN.value(),
+        timestamp = System.currentTimeMillis(),
+        state = AiAssistantEvents.Success,
+        end = true,
+        suggestions = null
+    )
+    MessageItem(
+        message = userMessage,
+        navigateToProfile = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MessageItemAssistantPreview() {
+    val assistantMessage = CompletionResponse(
+        content = "This is an assistant message with some helpful information and suggestions.",
+        sender = Issuer.AI.value(),
+        timestamp = System.currentTimeMillis(),
+        state = AiAssistantEvents.Success,
+        end = true,
+    )
+    MessageItem(
+        message = assistantMessage,
+        navigateToProfile = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatBlockPreview() {
+    val message = CompletionResponse(
+        content = "This is a sample chat message with **markdown** support.",
+        sender = Issuer.HUMAN.value(),
+        timestamp = System.currentTimeMillis(),
+        state = AiAssistantEvents.Success,
+        end = true,
+    )
+    ChatBlock(
+        message = message,
+        isUserMessage = true
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatBlockAssistantPreview() {
+    val message = CompletionResponse(
+        content = "This is an assistant response with suggestions below.",
+        sender = Issuer.AI.value(),
+        timestamp = System.currentTimeMillis(),
+        state = AiAssistantEvents.Success,
+        end = true,
+    )
+    ChatBlock(
+        message = message,
+        isUserMessage = false
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DayHeaderPreview() {
+    DayHeader(dayString = "Today")
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DayHeaderYesterdayPreview() {
+    DayHeader(dayString = "Yesterday")
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DayHeaderDatePreview() {
+    DayHeader(dayString = "July 3, 2025")
 }

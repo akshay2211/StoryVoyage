@@ -25,6 +25,7 @@ import io.ak1.demo.presentation.assistant.AiAssistantViewModel
 import io.ak1.demo.presentation.viewer.PdfViewerViewModel
 import io.ak1.demo.ui.components.Messages
 import io.ak1.demo.ui.components.UserInput
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.commonmark.node.Text
@@ -39,7 +40,7 @@ fun AiAssistantScreen(
     val state by viewModel.state.collectAsState()
     val pdfState by pdfViewerViewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
-    val scrollState = rememberLazyListState()
+    val scrollState = rememberLazyListState(Int.MAX_VALUE, Int.MAX_VALUE)
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
@@ -65,7 +66,7 @@ fun AiAssistantScreen(
 
                 is AiAssistantEvent.ScrollToBottom -> {
                     if (state.messages.isNotEmpty()) {
-                        scrollState.requestScrollToItem(Int.MAX_VALUE)
+                        scrollState.requestScrollToItem(Int.MAX_VALUE,Int.MAX_VALUE)
                     }
                 }
             }
@@ -88,7 +89,7 @@ fun AiAssistantScreen(
 
             // Messages list
             Messages(
-                messages = state.messages,
+                messages = state.messages.toImmutableList(),
                 navigateToProfile = { /* No-op or handle navigation */ },
                 modifier = Modifier.weight(1f),
                 scrollState = scrollState

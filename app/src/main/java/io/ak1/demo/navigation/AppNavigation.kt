@@ -13,8 +13,10 @@ import io.ak1.demo.ui.screens.HomeScreen
 import io.ak1.demo.ui.screens.PdfViewerScreen
 import io.ak1.demo.ui.screens.ResourcesScreen
 import io.ak1.demo.ui.screens.SettingsScreen
+import io.ak1.demo.ui.screens.SplashScreen
 
 sealed class Screen(val route: String) {
+    object Splash : Screen("splash")
     object Home : Screen("home")
     object Settings : Screen("settings")
     object Resources : Screen("resources")
@@ -32,7 +34,18 @@ sealed class Screen(val route: String) {
 fun AppNavigation(
     navController: NavHostController, sharedTransitionScope: SharedTransitionScope
 ) {
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
+
+    NavHost(navController = navController, startDestination = Screen.Splash.route) {
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = this
+            ) {
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            }
+        }
         composable(Screen.Home.route) {
             HomeScreen(sharedTransitionScope, this) { navController.navigate(it) }
         }

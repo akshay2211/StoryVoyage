@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import io.ak1.demo.domain.model.ThemeMode
 import io.ak1.demo.domain.model.ThemePreference
 import io.ak1.demo.domain.model.ThemeType
-import io.ak1.demo.domain.usecase.ThemeUseCases
+import io.ak1.demo.domain.repository.ThemeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -32,7 +32,7 @@ data class SettingsState(
 
 
 class SettingsViewModel(
-    private val themeUseCases: ThemeUseCases
+    private val themeRepository: ThemeRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -43,7 +43,7 @@ class SettingsViewModel(
     }
 
     private fun getThemePreferences() {
-        themeUseCases.getThemePreferences()
+        themeRepository.getThemePreferences()
             .onEach { preferences ->
                 _state.update { currentState ->
                     currentState.copy(
@@ -81,14 +81,14 @@ class SettingsViewModel(
     private fun setThemeType(themeType: ThemeType) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            themeUseCases.saveThemeType(themeType)
+            themeRepository.saveThemeType(themeType)
         }
     }
 
     private fun setThemeMode(themeMode: ThemeMode) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            themeUseCases.saveThemeMode(themeMode)
+            themeRepository.saveThemeMode(themeMode)
         }
     }
 }

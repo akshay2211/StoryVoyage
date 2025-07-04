@@ -81,29 +81,33 @@ dependencies {
     implementation(libs.nutrient)
     implementation(libs.androidx.ui.text.google.fonts)
 
+    // Palette
+    implementation(libs.androidx.palette.ktx)
+
     // Markwon (Markdown rendering).
-    implementation("io.noties.markwon:core:4.6.2")
-    implementation("io.noties.markwon:html:4.6.2")
-    implementation("io.noties.markwon:linkify:4.6.2")
-    implementation("io.noties.markwon:ext-tables:4.6.2")
-    implementation("io.noties.markwon:ext-tasklist:4.6.2")
-    implementation("io.noties.markwon:ext-strikethrough:4.6.2")
+    implementation(libs.markwon.core)
+    implementation(libs.markwon.html)
+    implementation(libs.markwon.linkify)
+    implementation(libs.markwon.ext.tables)
+    implementation(libs.markwon.ext.tasklist)
+    implementation(libs.markwon.ext.strikethrough)
 
     // Socket.IO
-    implementation("io.socket:socket.io-client:2.1.1")
+    implementation(libs.socket.io.client)
 
     // Json Web Tokens
-    implementation("io.github.nefilim.kjwt:kjwt-core:0.9.0")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    implementation(libs.kjwt.core)
+    implementation(libs.jjwt.api)
+    runtimeOnly(libs.jjwt.impl)
+    runtimeOnly(libs.jjwt.jackson)
 
     // Http logging.
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.logging.interceptor)
 
     // Lottie
-    implementation("com.airbnb.android:lottie-compose:6.0.1")
-    implementation("com.github.LottieFiles:dotlottie-android:0.5.0")
+    implementation(libs.lottie.compose)
+    //noinspection Aligned16KB
+    implementation("com.github.LottieFiles:dotlottie-android:0.8.0")
 
     // Testing
     testImplementation(libs.junit)

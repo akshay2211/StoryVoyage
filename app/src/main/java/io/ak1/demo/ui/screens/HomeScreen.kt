@@ -2,47 +2,36 @@
 
 package io.ak1.demo.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalPolice
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,41 +40,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import io.ak1.demo.R
 import io.ak1.demo.data.repository.Books
 import io.ak1.demo.domain.model.Book
 import io.ak1.demo.navigation.Screen
+import io.ak1.demo.ui.components.PaletteGenerator.convertImageUrlToBitmap
+import io.ak1.demo.ui.components.PaletteGenerator.extractColorsFromBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
 
 @Composable
@@ -98,6 +87,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
+
         drawerState = drawerState, drawerContent = {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -170,29 +160,96 @@ fun HomeContent(
     onMenuClick: () -> Unit,
     onPdfClick: (String) -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Story Voyage") }, navigationIcon = {
+    LazyColumn(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 12.dp)
+    ) {
+        item {
+            Box(Modifier.fillMaxWidth()) {
                 IconButton(onClick = onMenuClick) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    Icon(
+                        painter = painterResource(R.drawable.menu),
+                        contentDescription = "Sidebar button",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .graphicsLayer {
+                                rotationX = 180f
+                            }
+                            .rotate(90f)
+                            .align(Alignment.TopStart))
                 }
-            })
-        }) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Animated Welcome Banner
-            AnimatedWelcomeBanner()
 
-            Spacer(modifier = Modifier.height(24.dp))
 
+                Text(
+                    text = "Hello !!",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Light,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .align(Alignment.BottomStart)
+                )
+
+                with(sharedTransitionScope) {
+                    Image(
+                        painterResource(R.drawable.icon),
+                        contentDescription = "App Icon",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .padding(24.dp)
+                            .align(Alignment.TopEnd)
+                            .sharedElement(
+                                sharedContentState = rememberSharedContentState(key = "app_icon"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            ),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+                    )
+                }
+            }
+        }
+
+
+        item {
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier
+                        .padding(12.dp)
+                        .weight(1f, true)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            RoundedCornerShape(12.dp)
+                        )
+                        .padding(12.dp), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painterResource(R.drawable.magnifying_glass_duotone),
+                        contentDescription = "Search Icon",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Search", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                IconButton({}) {
+                    Icon(
+                        painterResource(R.drawable.sliders_duotone),
+                        "Settings Icon",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+        }
+
+
+
+        item {
             // Animated Title Entry
-            AnimatedSectionTitle(title = "Collections")
-
+            AnimatedSectionTitle(title = "Best-Seller")
             Spacer(modifier = Modifier.height(8.dp))
+
             val pdfList = Books.list
             // Enhanced PDF Pager with animations
             EnhancedPdfPager(
@@ -202,149 +259,23 @@ fun HomeContent(
                 pdfList = pdfList
             )
         }
-    }
-}
 
-@Composable
-fun AnimatedWelcomeBanner() {
-    // Animation states
-    var isVisible by remember { mutableStateOf(false) }
-    var showTextElements by remember { mutableStateOf(false) }
-
-    // Animated gradient colors
-    val infiniteTransition = rememberInfiniteTransition(label = "gradientTransition")
-    val gradientPosition by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 1f, animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse
-        ), label = "gradientPosition"
-    )
-
-    // Parallax effect state
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    var offsetY by remember { mutableFloatStateOf(0f) }
-
-    // Card scale animation on tap
-    var isPressed by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.98f else 1f, animationSpec = tween(150), label = "cardScale"
-    )
-
-    // Start entry animations
-    LaunchedEffect(Unit) {
-        isVisible = true
-        delay(500)
-        showTextElements = true
-    }
-
-    // Warm Nude Gradient
-    val gradientColors = listOf(
-        Color(0xFFE3CAC1), // Soft blush
-        Color(0xFFCDAA9D), // Muted rose
-        Color(0xFFB3897D), // Terracotta
-        Color(0xFF8A6A5E)  // Deep terracotta
-    )
-
-    val dynamicGradient = Brush.linearGradient(
-        colors = gradientColors,
-        start = Offset(gradientPosition * 1000f, 0f),
-        end = Offset(0f, 500f * (1 - gradientPosition))
-    )
-
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(
-            animationSpec = tween(1000), initialOffsetY = { it / 2 })) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp)
-                .padding(horizontal = 16.dp)
-                .scale(scale)
-                .pointerInput(Unit) {
-                    detectTapGestures(onPress = {
-                        isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
-                    }, onTap = { /* Handle tap if needed */ })
-                },
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Dynamic background with parallax effect
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(dynamicGradient)
-                    .offset {
-                        IntOffset(
-                            (offsetX * 15).roundToInt(), (offsetY * 10).roundToInt()
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = { position ->
-                                // Calculate normalized position for parallax
-                                offsetX = position.x / size.width - 0.5f
-                                offsetY = position.y / size.height - 0.5f
-                            })
-                    }) {
-                    // Optional decorative elements
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .offset(x = 200.dp, y = 20.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .offset(x = 50.dp, y = 150.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
-                    )
-                }
-
-                // Gradient overlay
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent, Color.Black.copy(alpha = 0.7f)
-                                )
-                            )
-                        )
-                )
-
-                // Welcome text with fade-in animation
-                this@Card.AnimatedVisibility(
-                    visible = showTextElements,
-                    enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(
-                        animationSpec = tween(1000), initialOffsetY = { it / 3 })) {
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Welcome to Story Voyage",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "\nExperience the power of AI with this demo.\n\n" + "See how easily you can customize and integrate an AI Assistant into your own app using the Nutrient SDK.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            }
+        item {
+            // Animated Title Entry
+            AnimatedSectionTitle(title = "Collections")
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        items(Books.list.reversed()){
+            AnimatedPdfCard2(
+                modifier = Modifier,
+                book = it,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                onClick = {onPdfClick.invoke(it.id)})
         }
     }
 }
+
 
 @Composable
 fun AnimatedSectionTitle(title: String) {
@@ -356,16 +287,24 @@ fun AnimatedSectionTitle(title: String) {
     }
 
     AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
-            animationSpec = tween(800), initialOffsetY = { it / 4 })) {
+        visible = isVisible, enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
+            animationSpec = tween(800), initialOffsetY = { it / 4 })
+    ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(12.dp)
+        )
+    }
+    if (!isVisible){
+        Text(
+            text = title,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(12.dp).alpha(0f)
         )
     }
 }
@@ -377,8 +316,7 @@ fun EnhancedPdfPager(
     onPdfClick: (String) -> Unit,
     pdfList: List<Book>
 ) {
-//    InfiniteHorizontalPager(pdfList) { page, pdf ->
-    LazyColumn {
+    LazyRow {
         items(pdfList) {
             AnimatedPdfCard(
                 modifier = Modifier,
@@ -392,50 +330,98 @@ fun EnhancedPdfPager(
 }
 
 @Composable
-fun InfiniteHorizontalPager(
-    documents: List<Book>,
-    modifier: Modifier = Modifier,
-    content: @Composable (page: Int, book: Book) -> Unit
+fun AnimatedPdfCard(
+    modifier: Modifier,
+    book: Book,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onClick: () -> Unit
 ) {
-    // Don't create the pager if we have no documents
-    if (documents.isEmpty()) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No documents available")
+    with(sharedTransitionScope) {
+        var colors by remember { mutableStateOf<Map<String, String>>(mapOf()) }
+        val context = LocalContext.current
+        LaunchedEffect(key1 = true) {
+            try {
+                val bitmap = convertImageUrlToBitmap(
+                    imageUrl = book.thumbnailUrl, context = context
+                )
+                if (bitmap != null) {
+                    colors = extractColorsFromBitmap(
+                        bitmap = bitmap
+                    )
+                }
+            } catch (e: Exception) {
+            }
         }
-        return
-    }
 
-    // Create a large virtual page count to simulate infinity
-    // The actual number of documents is used for the modulo
-    val virtualPageCount = Int.MAX_VALUE
-    val actualPageCount = documents.size
+        Box(
+            modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+                .clickable(onClick = onClick)
+        ) {
+            val color1 by remember {
+                derivedStateOf {
+                    colors["lightMuted"]?.toColorInt()?.let { Color(it) }
+                }
+            }
 
-    // Calculate a starting page in the middle of the virtual range to allow
-    // scrolling in both directions
-    val initialPage = virtualPageCount / 2
+            Spacer(
+                Modifier
+                    .size(260.dp, 380.dp)
+                    .padding(top = 50.dp)
+                    .background(
+                        color1 ?: Color.Magenta.copy(alpha = 0.3f), RoundedCornerShape(12.dp)
+                    )
+                    .alpha(0.8f)
+            )
 
-    val pagerState = rememberPagerState(
-        initialPage = initialPage, pageCount = { virtualPageCount })
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current).data(book.thumbnailUrl)
+                    .crossfade(true).build(),
+                contentDescription = book.title,
+                modifier = Modifier
+                    .padding(start = 30.dp, end = 20.dp, bottom = 30.dp)
+                    .width(200.dp)
+                    .height(280.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .sharedElement(
+                        sharedContentState = rememberSharedContentState(key = "image_${book.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                contentScale = ContentScale.Crop
+            )
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(480.dp),
-        pageSize = PageSize.Fixed(296.dp),
-        contentPadding = PaddingValues(start = 16.dp)
+            Column(
+                Modifier
+                    .padding(20.dp).width(200.dp).align(Alignment.BottomCenter)
+            ) {
 
-    ) { virtualPage ->
-        // Map the virtual page to an actual document index
-        val documentIndex = abs(virtualPage % actualPageCount)
-        val document = documents[documentIndex]
+                Text(
+                    modifier = Modifier,
+                    text = book.author,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    modifier = Modifier,
+                    text = book.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
 
-        content.invoke(documentIndex, document)
+        }
     }
 }
 
 @Composable
-fun AnimatedPdfCard(
+fun AnimatedPdfCard2(
     modifier: Modifier,
     book: Book,
     sharedTransitionScope: SharedTransitionScope,
@@ -459,7 +445,7 @@ fun AnimatedPdfCard(
                         .width(180.dp)
                         .height(140.dp)
                         .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "image_${book.id}"),
+                            sharedContentState = rememberSharedContentState(key = "image_${book.id}_h"),
                             animatedVisibilityScope = animatedVisibilityScope
                         ),
                     contentScale = ContentScale.Crop
@@ -471,9 +457,9 @@ fun AnimatedPdfCard(
                     .padding(12.dp)) {
                     Text(
                         modifier = Modifier.sharedElement(
-                                sharedContentState = rememberSharedContentState(key = "title_${book.id}"),
-                                animatedVisibilityScope = animatedVisibilityScope
-                            ),
+                            sharedContentState = rememberSharedContentState(key = "title_${book.id}_h"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
                         text = book.title,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
@@ -507,3 +493,4 @@ fun AnimatedPdfCard(
         }
     }
 }
+

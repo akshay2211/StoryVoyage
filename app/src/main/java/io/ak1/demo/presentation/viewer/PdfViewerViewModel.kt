@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pspdfkit.document.PdfDocument
 import com.pspdfkit.document.providers.DataProvider
-import io.ak1.demo.domain.usecase.InitializeAiAssistantUseCase
+import io.ak1.demo.domain.repository.AiAssistantRepository
 import io.nutrient.data.models.DocumentIdentifiers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PdfViewerViewModel(
-    private val initializeAiAssistantUseCase: InitializeAiAssistantUseCase
+    private val aiAssistantRepository: AiAssistantRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PdfViewerState())
@@ -56,7 +56,7 @@ class PdfViewerViewModel(
             _state.update { it.copy(isLoading = true) }
 
             try {
-                val success = initializeAiAssistantUseCase.execute(
+                val success = aiAssistantRepository.initialize(
                     pdfDocument,
                     dataProvider,
                     documentIdentifiers,

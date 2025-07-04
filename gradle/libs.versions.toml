@@ -1,25 +1,39 @@
 [versions]
-accompanistSystemuicontroller = "0.30.1"
-agp = "8.8.2"
+accompanistSystemuicontroller = "0.36.0"
+agp = "8.11.0"
 coilCompose = "2.7.0"
-datastorePreferences = "1.1.6"
-foundation = "1.8.1"
-koinAndroid = "4.0.0"
-koinCompose = "4.0.0"
-koinComposeViewmodel = "4.0.0"
-koinComposeViewmodelNavigation = "4.0.0"
-kotlin = "2.1.20"
+core = "4.6.2"
+datastorePreferences = "1.1.7"
+extStrikethrough = "4.6.2"
+extTables = "4.6.2"
+extTasklist = "4.6.2"
+foundation = "1.8.3"
+html = "4.6.2"
+jjwtApi = "0.12.6"
+jjwtImpl = "0.12.6"
+jjwtJackson = "0.12.6"
+kjwtCore = "1.0.0"
+koinAndroid = "4.1.0"
+koinCompose = "4.1.0"
+koinComposeViewmodel = "4.1.0"
+koinComposeViewmodelNavigation = "4.1.0"
+kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-kotlinxCoroutinesAndroid = "1.10.1"
-lifecycleRuntimeKtx = "2.9.0"
+kotlinxCoroutinesAndroid = "1.10.2"
+lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
-composeBom = "2025.05.00"
+composeBom = "2025.06.01"
+linkify = "4.6.2"
+loggingInterceptor = "4.12.0"
+lottieCompose = "6.6.7"
 navigationCompose = "2.9.0"
 nutrient = "10.1.1"
-uiTextGoogleFonts = "1.8.1"
+paletteKtx = "1.0.0"
+socketIoClient = "2.1.2"
+uiTextGoogleFonts = "1.8.3"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -31,8 +45,21 @@ androidx-foundation = { module = "androidx.compose.foundation:foundation", versi
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "paletteKtx" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+markwon-ext-strikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "extStrikethrough" }
+markwon-ext-tables = { module = "io.noties.markwon:ext-tables", version.ref = "extTables" }
+markwon-ext-tasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "extTasklist" }
+markwon-html = { module = "io.noties.markwon:html", version.ref = "html" }
+jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwtApi" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwtImpl" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwtJackson" }
+kjwt-core = { module = "io.github.nefilim.kjwt:kjwt-core", version.ref = "kjwtCore" }
+markwon-linkify = { module = "io.noties.markwon:linkify", version.ref = "linkify" }
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
+markwon-core = { module = "io.noties.markwon:core", version.ref = "core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -53,6 +80,7 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koinComposeViewmodelNavigation" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 nutrient = { module = "io.nutrient:nutrient", version.ref = "nutrient" }
+socket-io-client = { module = "io.socket:socket.io-client", version.ref = "socketIoClient" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
