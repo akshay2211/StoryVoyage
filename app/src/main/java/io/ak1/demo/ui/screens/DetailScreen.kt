@@ -101,7 +101,7 @@ fun DetailScreen(
     }
 
     with(sharedTransitionScope) {
-        Box {
+        Box(Modifier.background(MaterialTheme.colorScheme.background)) {
             LazyColumn {
                 item {
                     Box {
@@ -121,8 +121,7 @@ fun DetailScreen(
                         IconButton(
                             onClick = {
                                 navTo.invoke(Screen.Home.route)
-                            },
-                            modifier = Modifier
+                            }, modifier = Modifier
                                 .padding(12.dp)
                                 .statusBarsPadding()
                                 .background(
@@ -154,6 +153,7 @@ fun DetailScreen(
                             ),
                         text = book.title,
                         style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -165,14 +165,18 @@ fun DetailScreen(
                     Text(
                         "Author: ${book.author}",
                         modifier = Modifier.padding(horizontal = 12.dp),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(Modifier.height(12.dp))
 
                     Text(
                         book.description,
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 100.dp),
-                        style = MaterialTheme.typography.bodyMedium
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 100.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }

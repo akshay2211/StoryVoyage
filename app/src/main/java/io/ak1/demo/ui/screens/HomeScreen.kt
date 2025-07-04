@@ -193,15 +193,21 @@ fun HomeContent(
                         .align(Alignment.BottomStart)
                 )
 
-                Image(
-                    painterResource(R.drawable.icon),
-                    contentDescription = "App Icon",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .padding(24.dp)
-                        .align(Alignment.TopEnd),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
-                )
+                with(sharedTransitionScope) {
+                    Image(
+                        painterResource(R.drawable.icon),
+                        contentDescription = "App Icon",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .padding(24.dp)
+                            .align(Alignment.TopEnd)
+                            .sharedElement(
+                                sharedContentState = rememberSharedContentState(key = "app_icon"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            ),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+                    )
+                }
             }
         }
 
@@ -343,8 +349,6 @@ fun AnimatedPdfCard(
                     colors = extractColorsFromBitmap(
                         bitmap = bitmap
                     )
-                    Log.e("AKshay", "COlors: $colors")
-
                 }
             } catch (e: Exception) {
             }

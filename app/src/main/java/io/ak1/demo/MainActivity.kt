@@ -21,7 +21,7 @@ import io.ak1.demo.ui.theme.StoryVoyageTheme
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
-const val ipAddress = "192.168.1.8"
+const val ipAddress = "192.168.1.9"
 
 class MainActivity : AppCompatActivity() {
 

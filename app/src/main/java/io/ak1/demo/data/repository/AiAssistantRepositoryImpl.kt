@@ -33,8 +33,6 @@ class AiAssistantRepositoryImpl(
         aiAssistantDataSource.emitMessage(message, documentId)
     }
 
-
-
     override suspend fun terminate() {
         aiAssistantDataSource.terminate()
     }
