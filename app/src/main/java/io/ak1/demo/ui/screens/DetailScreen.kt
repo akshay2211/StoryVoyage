@@ -25,12 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,19 +34,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.pspdfkit.document.DocumentSource
-import com.pspdfkit.document.PdfDocumentLoader
 import com.pspdfkit.document.providers.DataProvider
 import com.pspdfkit.document.providers.UrlDataProvider
 import io.ak1.demo.data.repository.Books
 import io.ak1.demo.data.util.FileDataProvider
 import io.ak1.demo.navigation.Screen
-import io.ak1.demo.presentation.viewer.PdfViewerIntent
 import io.ak1.demo.presentation.viewer.PdfViewerViewModel
-import io.nutrient.data.models.DocumentIdentifiers
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 
@@ -85,20 +72,6 @@ fun DetailScreen(
     navTo: (String) -> Unit
 ) {
     val book = Books.list.find { it.id == id } ?: return
-    val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
-    val cacheDir = context.cacheDir
-    val file = File(cacheDir, "${book.title}.pdf")
-    val scope = rememberCoroutineScope()
-
-    val dataProvider: DataProvider by remember {
-        mutableStateOf(
-            if (file.exists()) FileDataProvider(file) else UrlDataProvider(
-                java.net.URL(book.pdfUrl), file
-            )
-        )
-    }
-
     with(sharedTransitionScope) {
         Box(Modifier.background(MaterialTheme.colorScheme.background)) {
             LazyColumn {

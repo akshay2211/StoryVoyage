@@ -1,9 +1,7 @@
 package io.ak1.demo
 
 import android.os.Bundle
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -18,7 +16,6 @@ import io.ak1.demo.domain.model.ThemePreference
 import io.ak1.demo.navigation.AppNavigation
 import io.ak1.demo.presentation.theme.ThemeViewModel
 import io.ak1.demo.ui.theme.StoryVoyageTheme
-import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
 const val ipAddress = "192.168.1.8"
@@ -29,9 +26,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            KoinContext {
-                ThemeApp { AppNavigation(rememberNavController(), it) }
-            }
+            ThemeApp { AppNavigation(rememberNavController(), it) }
         }
     }
 }

@@ -21,13 +21,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,22 +37,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LastBaseline
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import io.ak1.demo.R
 import io.ak1.demo.presentation.assistant.AiAssistantEvent
 import io.ak1.demo.presentation.assistant.AiAssistantIntent
 import io.ak1.demo.presentation.assistant.AiAssistantViewModel
-import io.ak1.demo.presentation.assistant.getDate
 import io.ak1.demo.presentation.viewer.PdfViewerViewModel
-import io.ak1.demo.ui.components.ChatBlock
 import io.ak1.demo.ui.components.Messages
 import io.ak1.demo.ui.components.UserInput
 import kotlinx.collections.immutable.toImmutableList
@@ -166,7 +157,7 @@ fun AiAssistantScreen(
 
         if (state.isRecording) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                androidx.compose.material3.Text(
+                Text(
                     text = state.partialRecordingText,
                     style = MaterialTheme.typography.displayMedium,
                     textAlign = TextAlign.Center,
