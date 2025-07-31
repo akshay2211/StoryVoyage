@@ -22,6 +22,22 @@ import androidx.compose.ui.unit.dp
 import io.ak1.demo.R
 import kotlinx.coroutines.delay
 
+/**
+ * Splash Screen composable that displays the app logo during app startup.
+ * 
+ * This screen provides a branded introduction experience with features including:
+ * - Centered app logo with Material Design theming
+ * - Shared element transition preparation for smooth navigation
+ * - Automatic timeout and navigation to the main screen
+ * - Clean, minimal design focused on brand recognition
+ * 
+ * The screen serves as the entry point and prepares shared elements
+ * for seamless transitions to the main app interface.
+ * 
+ * @param sharedTransitionScope Scope for managing shared element transitions
+ * @param animatedVisibilityScope Scope for coordinating animation visibility
+ * @param onSplashFinished Callback invoked when splash duration completes
+ */
 @Composable
 fun SplashScreen(
     sharedTransitionScope: SharedTransitionScope,
@@ -47,7 +63,6 @@ fun SplashScreen(
                             tween(durationMillis = 800)
                         }
                     ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
         }
     }

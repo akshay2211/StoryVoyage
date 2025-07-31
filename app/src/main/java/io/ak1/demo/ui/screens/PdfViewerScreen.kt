@@ -68,6 +68,25 @@ import java.io.File
 import io.ak1.demo.domain.model.ThemeMode as AppThemeMode
 
 
+/**
+ * PDF Viewer Screen composable that provides advanced document viewing and AI assistance.
+ * 
+ * This screen integrates the Nutrient PDF SDK with AI-powered assistance, offering:
+ * - Professional PDF rendering with advanced features
+ * - Integrated AI Assistant with document-aware conversations
+ * - Modal navigation drawer for seamless chat access
+ * - Responsive toolbar with context-aware controls
+ * - Theme-aware configuration matching app preferences
+ * - Error handling and loading states
+ * 
+ * The screen supports both reading and chat modes, automatically initializing
+ * the AI Assistant when chat functionality is requested.
+ * 
+ * @param id Unique identifier of the book/document to display
+ * @param chat Boolean flag indicating if chat mode should be active
+ * @param navigateBack Navigation callback for returning to previous screen
+ * @param viewModel PDF Viewer ViewModel managing document and AI state
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalStdlibApi::class)
 @Composable
 fun PdfViewerScreen(

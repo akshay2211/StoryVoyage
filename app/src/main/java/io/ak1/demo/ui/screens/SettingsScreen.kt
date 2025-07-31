@@ -45,6 +45,22 @@ import io.ak1.demo.presentation.settings.SettingsIntent
 import io.ak1.demo.presentation.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * Settings Screen composable that provides theme customization options.
+ * 
+ * This screen offers comprehensive theme management with features including:
+ * - Theme type selection with visual previews
+ * - Theme mode switching (Light, Dark, Auto)
+ * - Expandable option panels with smooth animations
+ * - Persistent storage of user preferences
+ * - Material Design 3 components and styling
+ * 
+ * The screen follows MVI pattern for state management and provides
+ * immediate feedback for all user interactions.
+ * 
+ * @param viewModel Settings ViewModel managing theme preferences and UI state
+ * @param navTo Navigation callback for returning to previous screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(

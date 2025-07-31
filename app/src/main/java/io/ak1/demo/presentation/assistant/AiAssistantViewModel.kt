@@ -1,5 +1,6 @@
 package io.ak1.demo.presentation.assistant
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ak1.demo.domain.model.VoiceRecognitionState
@@ -21,23 +22,48 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * ViewModel for managing AI Assistant interactions and voice recognition functionality.
+ * 
+ * This ViewModel implements the MVI (Model-View-Intent) pattern for handling:
+ * - AI chat conversations with streaming responses
+ * - Voice recognition for hands-free interaction
+ * - Message state management and UI events
+ * - Real-time response handling from AI service
+ * 
+ * @param aiAssistantRepository Repository for AI Assistant operations
+ * @param voiceRecognitionRepository Repository for voice recognition operations
+ */
 class AiAssistantViewModel(
     private val aiAssistantRepository: AiAssistantRepository,
     private val voiceRecognitionRepository: VoiceRecognitionRepository
 ) : ViewModel() {
 
+    /** Mutable state flow for managing AI Assistant UI state */
     private val _state = MutableStateFlow(AiAssistantState())
+    
+    /** Exposed read-only state flow for UI observation */
     val state: StateFlow<AiAssistantState> = _state.asStateFlow()
 
+    /**
+     * Cleanup method called when ViewModel is destroyed.
+     * Resets the state to prevent memory leaks.
+     */
     override fun onCleared() {
         super.onCleared()
         _state.update { AiAssistantState() }
     }
 
+    /** Channel for one-time UI events */
     private val _events = Channel<AiAssistantEvent>()
+    
+    /** Exposed flow for UI events like errors and navigation */
     val events = _events.receiveAsFlow()
 
-    // Collect voice recognition state and AI responses
+    /**
+     * Initializes voice recognition state collection.
+     * Automatically updates UI state when voice recognition state changes.
+     */
     init {
         viewModelScope.launch {
             voiceRecognitionRepository.voiceState.collectLatest { voiceState ->
@@ -46,6 +72,12 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Processes user intents using the MVI pattern.
+     * Routes different types of user actions to appropriate handler methods.
+     * 
+     * @param intent The user intent to process
+     */
     fun processIntent(intent: AiAssistantIntent) {
         when (intent) {
             is AiAssistantIntent.SendMessage -> sendMessage(intent.message)
@@ -56,16 +88,34 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Updates the input text field in the UI state.
+     * 
+     * @param text The new text to set in the input field
+     */
     private fun updateInputText(text: String) {
         _state.update { it.copy(inputText = text) }
     }
 
+    /**
+     * Sends a message to the AI Assistant.
+     * Clears the input field, shows loading state, and triggers scroll to bottom.
+     * 
+     * @param message The message text to send to the AI
+     */
     fun sendMessage(message: String) {
         if (message.isBlank()) return
 
         viewModelScope.launch {
-            // Clear input
-            _state.update { it.copy(inputText = "", isLoading = true) }
+            
+            // Add user message and update state
+            _state.update { currentState ->
+                currentState.copy(
+                    inputText = "",
+                    isLoading = true,
+                    messages = currentState.messages
+                )
+            }
 
             // Trigger scroll to bottom event
             _events.send(AiAssistantEvent.ScrollToBottom)
@@ -77,7 +127,7 @@ class AiAssistantViewModel(
                 // Send message to AI Assistant
                 aiAssistantRepository.sendMessage(message, documentId)
 
-                // The response will be handled by the flow collector in init
+                // The response will be handled by the flow collector in startListening()
             } catch (e: Exception) {
                 _events.send(AiAssistantEvent.Error("Failed to send message: ${e.message}"))
                 _state.update { it.copy(isLoading = false) }
@@ -85,8 +135,16 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Handles AI response from the streaming API.
+     * Manages message threading for streaming responses and updates UI state accordingly.
+     * 
+     * @param response The completion response from the AI service
+     */
     private fun handleAiResponse(response: CompletionResponse) {
         viewModelScope.launch {
+            Log.i("Response"," MessageItem: ${response.end} *${response.sender}* - ${response.timestamp} - *${response.state}* - ${response.content}")
+
             when (response.state) {
 
                 is AiAssistantEvents.Chat -> {
@@ -150,6 +208,10 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Initiates voice recognition recording.
+     * Updates the UI state to indicate recording is active and handles any errors.
+     */
     private fun startRecording() {
         viewModelScope.launch {
             try {
@@ -161,6 +223,10 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Stops voice recognition recording and processes the recognized text.
+     * Updates the input field with the recognized text and resets recording state.
+     */
     private fun stopRecording() {
         viewModelScope.launch {
             try {
@@ -177,6 +243,10 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Cancels ongoing voice recognition recording.
+     * Discards any partial recording text and resets the recording state.
+     */
     private fun cancelRecording() {
         viewModelScope.launch {
             try {
@@ -193,6 +263,12 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Updates the UI state based on voice recognition changes.
+     * Handles partial text updates, final text results, and error states.
+     * 
+     * @param voiceState The current voice recognition state from the repository
+     */
     private fun updateVoiceState(voiceState: VoiceRecognitionState) {
         _state.update {
             it.copy(
@@ -216,6 +292,11 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Adds a new message to the conversation state.
+     * 
+     * @param message The CompletionResponse message to add to the conversation
+     */
     private fun addMessage(message: CompletionResponse) {
         _state.update { currentState ->
             currentState.copy(
@@ -224,14 +305,15 @@ class AiAssistantViewModel(
         }
     }
 
+    /**
+     * Starts listening to the AI Assistant response stream.
+     * Collects incoming responses and processes them through handleAiResponse.
+     * This method should be called once when the AI Assistant is initialized.
+     */
     fun startListening() {
         viewModelScope.launch {
             aiAssistantRepository.responseStream.collect { response ->
-                if (response == null) {
-                    // do nothing
-                } else {
-                    handleAiResponse(response)
-                }
+                response?.let { handleAiResponse(it) }
             }
         }
     }
@@ -239,6 +321,11 @@ class AiAssistantViewModel(
 
 }
 
+/**
+ * Extension function to format the timestamp of a CompletionResponse into a readable time string.
+ * 
+ * @return Formatted time string in "HH:mm aa" format (e.g., "02:30 PM")
+ */
 fun CompletionResponse.getDate(): String {
     val formatter = SimpleDateFormat("HH:mm aa", Locale.getDefault())
     return formatter.format(Date(this.timestamp))

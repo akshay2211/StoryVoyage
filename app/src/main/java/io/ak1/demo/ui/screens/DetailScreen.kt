@@ -56,6 +56,25 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 
+/**
+ * Detail Screen composable that displays comprehensive book information.
+ * 
+ * This screen provides a detailed view of a selected book with features including:
+ * - Hero image with shared element transitions
+ * - Book metadata (title, author, description)
+ * - Action buttons for reading and chat functionality
+ * - Smooth animations and transitions
+ * - PDF caching and preparation for optimal performance
+ * 
+ * The screen uses shared element transitions for smooth navigation
+ * and prepares PDF data providers for efficient document loading.
+ * 
+ * @param id Unique identifier of the book to display
+ * @param sharedTransitionScope Scope for managing shared element transitions
+ * @param animatedVisibilityScope Scope for coordinating animation visibility
+ * @param viewModel PDF Viewer ViewModel for managing document state
+ * @param navTo Navigation callback for screen transitions
+ */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailScreen(
@@ -78,26 +97,6 @@ fun DetailScreen(
                 java.net.URL(book.pdfUrl), file
             )
         )
-    }
-    LaunchedEffect(Unit) {
-        val documentSource = DocumentSource(dataProvider)
-        scope.launch {
-            PdfDocumentLoader.openDocumentAsync(context, documentSource)
-                .subscribeOn(Schedulers.io()) // Run on background thread
-                .observeOn(AndroidSchedulers.mainThread()).subscribe { pdfDocument, onError ->
-                    if (pdfDocument == null) return@subscribe
-                    val permanentId = pdfDocument.permanentId.toHexString()
-                    val changeId = pdfDocument.changeId.toHexString()
-
-                    viewModel.processIntent(
-                        PdfViewerIntent.InitializeAiAssistant(
-                            pdfDocument,
-                            FileDataProvider(file),
-                            DocumentIdentifiers(permanentId, changeId)
-                        )
-                    )
-                }
-        }
     }
 
     with(sharedTransitionScope) {
@@ -196,7 +195,7 @@ fun DetailScreen(
                 Spacer(Modifier.width(12.dp))
                 Button({
                     navTo.invoke(Screen.Reader.createRoute(book.id, true))
-                }, modifier = Modifier.weight(1f, true), enabled = state.isAiAssistantInitialized) {
+                }, modifier = Modifier.weight(1f, true)) {
                     Text("Chat")
                 }
             }
