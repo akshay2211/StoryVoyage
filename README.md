@@ -13,7 +13,7 @@
 
 *Transform your reading experience with AI-powered assistance, voice recognition, and seamless PDF interaction*
 
-[🚀 **Get Started**](#quick-start) • [📱 **Features**](#features) • [🎥 **Demo**](#demo) • [🏗️ **Architecture**](#architecture) • [📖 **Blog**](https://www.nutrient.io/blog/from-zero-to-ai-building-custom-chat-interfaces-with-nutrient-on-android/)
+[🚀 **Get Started**](https://github.com/akshay2211/StoryVoyage/tree/main#-quick-start) • [📱 **Features**](https://github.com/akshay2211/StoryVoyage/tree/main#-features) • [🎥 **Demo**](https://github.com/akshay2211/StoryVoyage/tree/main#-demo) • [🏗️ **Architecture**](https://github.com/akshay2211/StoryVoyage/tree/main#%EF%B8%8F-architecture) • [📖 **Blog**](https://www.nutrient.io/blog/from-zero-to-ai-building-custom-chat-interfaces-with-nutrient-on-android/)
 
 </div>
 
