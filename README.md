@@ -13,7 +13,7 @@
 
 *Transform your reading experience with AI-powered assistance, voice recognition, and seamless PDF interaction*
 
-[🚀 **Get Started**](#quick-start) • [📱 **Features**](#features) • [🎥 **Demo**](#demo) • [🏗️ **Architecture**](#architecture)
+[🚀 **Get Started**](#quick-start) • [📱 **Features**](#features) • [🎥 **Demo**](#demo) • [🏗️ **Architecture**](#architecture) • [📖 **Blog**](https://www.nutrient.io/blog/from-zero-to-ai-building-custom-chat-interfaces-with-nutrient-on-android/)
 
 </div>
 
@@ -373,6 +373,13 @@ We welcome contributions from the community! Here's how you can help make StoryV
 
 - **Public Domain Books**: Sourced from [InfoBooks.org](https://www.infobooks.org)
 - **Icons**: [Reading icons by mangsaabguru - Flaticon](https://www.flaticon.com/free-icons/reading)
+
+### 📖 Featured Article
+
+- **Tutorial Blog**: [From Zero to AI: Building Custom Chat Interfaces with Nutrient on Android](https://www.nutrient.io/blog/from-zero-to-ai-building-custom-chat-interfaces-with-nutrient-on-android/)
+  - Complete step-by-step guide for building AI-powered chat interfaces
+  - Implementation details for integrating Nutrient SDK with AI assistants
+  - Best practices for Android development with modern architecture patterns
 
 ---
 
