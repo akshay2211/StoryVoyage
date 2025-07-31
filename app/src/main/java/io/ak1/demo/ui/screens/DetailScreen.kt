@@ -34,14 +34,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.pspdfkit.document.providers.DataProvider
-import com.pspdfkit.document.providers.UrlDataProvider
 import io.ak1.demo.data.repository.Books
-import io.ak1.demo.data.util.FileDataProvider
 import io.ak1.demo.navigation.Screen
 import io.ak1.demo.presentation.viewer.PdfViewerViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import java.io.File
 
 /**
  * Detail Screen composable that displays comprehensive book information.
