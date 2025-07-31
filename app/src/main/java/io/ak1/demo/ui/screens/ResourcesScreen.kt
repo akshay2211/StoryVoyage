@@ -16,6 +16,20 @@ import androidx.compose.ui.Modifier
 import io.ak1.demo.ui.components.MarkdownSource
 import io.ak1.demo.ui.components.MarkdownViewer
 
+/**
+ * Resources Screen composable that displays licensing and attribution information.
+ * 
+ * This screen provides legal compliance and attribution details with features including:
+ * - Markdown-based content rendering from assets
+ * - Standard Material Design 3 scaffold layout
+ * - Back navigation with arrow icon
+ * - Clean, readable presentation of legal information
+ * 
+ * The screen loads markdown content from the assets folder and renders it
+ * using a dedicated markdown viewer component.
+ * 
+ * @param navTo Navigation callback for returning to previous screen
+ */
 @Composable
 fun ResourcesScreen(navTo: () -> Unit) {
     Scaffold(topBar = {

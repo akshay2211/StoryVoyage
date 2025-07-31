@@ -2,7 +2,6 @@
 
 package io.ak1.demo.ui.screens
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -56,7 +55,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -76,7 +74,23 @@ import io.ak1.demo.ui.components.PaletteGenerator.extractColorsFromBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
+/**
+ * Home Screen composable that serves as the main book library interface.
+ * 
+ * This screen provides the primary navigation and book discovery experience with features including:
+ * - Book grid display with smooth shared element transitions
+ * - Navigation drawer for app-wide navigation
+ * - Dynamic color palette extraction from book covers
+ * - Responsive layout adapting to different screen sizes
+ * - Smooth animations and visual feedback
+ * 
+ * The screen uses shared element transitions for seamless navigation
+ * to book detail screens and integrates with the app's navigation system.
+ * 
+ * @param sharedTransitionScope Scope for managing shared element transitions
+ * @param animatedVisibilityScope Scope for coordinating animation visibility
+ * @param navTo Navigation callback for screen transitions
+ */
 @Composable
 fun HomeScreen(
     sharedTransitionScope: SharedTransitionScope,
@@ -205,7 +219,6 @@ fun HomeContent(
                                 sharedContentState = rememberSharedContentState(key = "app_icon"),
                                 animatedVisibilityScope = animatedVisibilityScope
                             ),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
                     )
                 }
             }
@@ -351,6 +364,7 @@ fun AnimatedPdfCard(
                     )
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 

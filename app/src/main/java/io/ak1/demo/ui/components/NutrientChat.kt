@@ -28,20 +28,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.ak1.demo.R
@@ -84,12 +89,20 @@ fun Messages(
             items(
                 items = messages.withDateDividers()
             ) { item ->
+
                 when (item) {
                     is ChatListItem.DateDivider -> DayHeader(dayString = formatDateDivider(item.date))
                     is ChatListItem.MessageItem -> {
+                        key(item.message.index) {
                         if (item.message.content.isNullOrEmpty()) return@items
-                        MessageItem(message = item.message, navigateToProfile = navigateToProfile, onClick = onClick)
-                    }
+                        MessageItem(message = item.message, navigateToProfile = navigateToProfile,
+                            onSizeChange = { it ->
+                                if (!item.message.end) {
+                                    scrollState.scrollToItem(messages.lastIndex, it.height)
+                                }
+                            },
+                            onClick = onClick)
+                    }}
                 }
             }
         }
@@ -107,14 +120,17 @@ fun Messages(
 @Composable
 fun MessageItem(
     message: CompletionResponse, navigateToProfile: (String) -> Unit,
+    onSizeChange : suspend (IntSize) -> Unit = {},
     onClick: (String) -> Unit = {}
 ) {
-    val isUserMessage = message.sender == Issuer.HUMAN.value()
+    val scope = rememberCoroutineScope()
+   val isUserMessage = message.sender == Issuer.HUMAN.value()
     val borderColor = if (isUserMessage) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.tertiary
     }
+    var size by remember { mutableStateOf(IntSize.Zero) }
 
     CompositionLocalProvider(LocalLayoutDirection provides if (isUserMessage) LayoutDirection.Rtl else LayoutDirection.Ltr) {
         Row(modifier = Modifier.padding(vertical = 4.dp)) {
@@ -141,6 +157,11 @@ fun MessageItem(
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .weight(1f)
+                    .onGloballyPositioned{ it ->
+                        if (size == it.size) return@onGloballyPositioned
+                        size = it.size
+                        scope.launch { onSizeChange.invoke(size) }
+                    }
             ) {
                 // Author and timestamp
                 Row(
